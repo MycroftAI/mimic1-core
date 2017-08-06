@@ -40,6 +40,8 @@
 #ifndef _CST_AUDIO_H__
 #define _CST_AUDIO_H__
 
+#include "config.h"
+
 #include "cst_wave.h"
 #include "cst_hrg.h"
 

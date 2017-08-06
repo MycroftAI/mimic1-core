@@ -40,6 +40,8 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include "cst_audio.h"
+
 #ifdef CST_AUDIO_FREEBSD
 /* probably Net and Open too */
 #include <machine/soundcard.h>
@@ -50,7 +52,6 @@
 #include <sys/types.h>
 #include "cst_string.h"
 #include "cst_wave.h"
-#include "cst_audio.h"
 
 #include <sys/stat.h>
 #include <fcntl.h>

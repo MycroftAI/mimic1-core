@@ -38,6 +38,8 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include "cst_audio.h"
+
 #ifdef CST_AUDIO_SUNOS
 
 #include <stdio.h>
@@ -51,7 +53,6 @@
 #include <sys/audioio.h>
 #include "cst_string.h"
 #include "cst_wave.h"
-#include "cst_audio.h"
 
 static const char *sun_audio_device = "/dev/audio";
 

@@ -38,6 +38,8 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include "cst_audio.h"
+
 #ifdef CST_AUDIO_PORTAUDIO
 
 #include <stdio.h>
@@ -46,8 +48,6 @@
 #include <string.h>
 #include <math.h>
 #include <portaudio.h>
-
-#include "cst_audio.h"
 
 typedef struct {
     void *buff;

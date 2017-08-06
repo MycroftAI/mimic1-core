@@ -41,6 +41,8 @@
 #ifndef _NATIVE_AUDIO_H__
 #define _NATIVE_AUDIO_H__
 
+#include "config.h"
+
 #ifdef CST_AUDIO_COMMAND
 
 #define AUDIO_INIT_NATIVE audio_init_command

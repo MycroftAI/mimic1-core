@@ -40,12 +40,12 @@
 /*  http://pulseaudio.org/                                               */
 /*                                                                       */
 /*************************************************************************/
+#include "cst_audio.h"
 
 #ifdef CST_AUDIO_PULSEAUDIO
 
 #include "cst_string.h"
 #include "cst_wave.h"
-#include "cst_audio.h"
 
 #include <pulse/simple.h>
 

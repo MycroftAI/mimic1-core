@@ -41,9 +41,11 @@
 /*  (apparent?) memory leaks                                             */
 /*************************************************************************/
 
-#ifdef CST_AUDIO_ALSA
-
 #define _POSIX_C_SOURCE 200112L
+
+#include "cst_audio.h"
+
+#ifdef CST_AUDIO_ALSA
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -54,7 +56,6 @@
 
 #include "cst_string.h"
 #include "cst_wave.h"
-#include "cst_audio.h"
 
 /* alloca.h is not C99 compliant nor POSIX compliant, but alsa needs it and does not include it */
 /* See similar patch: https://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2008-July/058080.html */

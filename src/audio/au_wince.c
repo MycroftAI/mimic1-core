@@ -37,12 +37,13 @@
 /*                                                                       */
 /*************************************************************************/
 
+#include "cst_audio.h"
+
 #ifdef CST_AUDIO_WINCE
 
 #include <windows.h>
 #include <mmsystem.h>
 
-#include "cst_audio.h"
 #include "cst_alloc.h"
 
 typedef struct au_wince_pdata_struct {

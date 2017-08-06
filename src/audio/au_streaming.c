@@ -40,10 +40,10 @@
 /*  at least as big as the requested buffer size (except for last chunk  */
 /*                                                                       */
 /*************************************************************************/
-
+#include "cst_audio.h"
 #include "cst_string.h"
 #include "cst_wave.h"
-#include "cst_audio.h"
+
 
 CST_VAL_REGISTER_TYPE(audio_streaming_info, cst_audio_streaming_info);
 cst_audio_streaming_info *new_audio_streaming_info(void)
