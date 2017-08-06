@@ -81,8 +81,7 @@
 #ifndef _CST_REGEX_H__
 #define _CST_REGEX_H__
 
-#include "cst_file.h"
-#include "cst_string.h"
+#include <stddef.h> /* for size_t */
 
 /*
  * The first byte of the regexp internal "program" is actually this magic

@@ -38,10 +38,10 @@
 /*  Includes a mapping of fsf format regex's to hs format (escaping)     */
 /*                                                                       */
 /*************************************************************************/
-#include "cst_alloc.h"
 #include "cst_regex.h"
-
 #include "cst_regex_defs.h"
+#include <string.h>
+#include <stdlib.h>
 
 /* For access by const models */
 const cst_regex *const cst_regex_table[] = {
@@ -66,7 +66,7 @@ int cst_regex_match(const cst_regex *r, const char *str)
     s = hs_regexec(r, str);
     if (s)
     {
-        cst_free(s);
+        free(s);
         return 1;
     }
     else
@@ -87,7 +87,7 @@ cst_regex *new_cst_regex(const char *str)
     char *reg_str = regularize(str, 1);
 
     r = hs_regcomp(reg_str);
-    cst_free(reg_str);
+    free(reg_str);
 
     return r;
 }
@@ -112,7 +112,7 @@ static const char *const spencer_magic_backslashed = "<>";
 /* of escape sequences, as taken from EST_Regex.cc in EST              */
 static char *regularize(const char *unregex, int match)
 {
-    char *reg = cst_alloc(char, cst_strlen(unregex) * 2 + 3);
+    char *reg = malloc(sizeof(char) * (strlen(unregex) * 2 + 3));
     char *r = reg;
     const char *e;
     int magic = 0, last_was_bs = 0;

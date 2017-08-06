@@ -22,9 +22,12 @@
    Huggins-Daines <dhd@cepstral.com> on 2001-10-23 to use a different
    API and be re-entrant and safe and all that good stuff. */
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "cst_regex.h"
-#include "cst_string.h"
-#include "cst_error.h"
+
+#define	FAIL(m)	{ fprintf(stderr, "regexp failure: %s\n", m); exit(-1); }
 
 size_t cst_regsub(const cst_regstate *state, const char *in, char *out,
                   size_t max)
@@ -36,8 +39,7 @@ size_t cst_regsub(const cst_regstate *state, const char *in, char *out,
 
     if (state == NULL || in == NULL)
     {
-        cst_errmsg("NULL parm to regsub\n");
-        cst_error();
+        FAIL("NULL parm to regsub\n");
     }
 
     src = in;
@@ -74,8 +76,7 @@ size_t cst_regsub(const cst_regstate *state, const char *in, char *out,
                 /* strncpy hit NUL. */
                 if (len != 0 && *(dst - 1) == '\0')
                 {
-                    cst_errmsg("damaged match string");
-                    cst_error();
+                    FAIL("damaged match string");
                 }
             }
             count += len;

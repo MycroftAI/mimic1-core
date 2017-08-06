@@ -39,10 +39,9 @@
  * precedence is structured in regular expressions.  Serious changes in
  * regular-expression syntax might require a total rethink.  */
 #include <ctype.h>
-#include "cst_alloc.h"
-#include "cst_string.h"
-#include "cst_file.h"
-#include "cst_error.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "cst_regex.h"
 
 /*
@@ -150,7 +149,7 @@
 #define	UCHARAT(p)	((int)*(p)&CHARBITS)
 #endif
 
-#define	FAIL(m)	{ cst_errmsg("regexp failure: %s\n", m); cst_error(); }
+#define	FAIL(m)	{ fprintf(stderr, "regexp failure: %s\n", m); exit(-1); }
 #define	ISMULT(c)	((c) == '*' || (c) == '+' || (c) == '?')
 
 /*
@@ -233,10 +232,12 @@ cst_regex *hs_regcomp(const char *exp)
         FAIL("regexp too big");
 
     /* Allocate space. */
-    r = cst_alloc(cst_regex, 1);
-    r->regsize = regsize;
-    r->program = cst_alloc(char, regsize);
+    r = calloc(1, sizeof(cst_regex));
     if (r == NULL)
+        FAIL("out of space");
+    r->regsize = regsize;
+    r->program = calloc(regsize, sizeof(char));
+    if (r->program == NULL)
         FAIL("out of space");
 
     /* Second pass: emit code. */
@@ -278,10 +279,10 @@ cst_regex *hs_regcomp(const char *exp)
             len = 0;
             for (; scan != NULL; scan = regnext(scan))
                 if ((OP(scan) == EXACTLY) &&
-                    (cst_strlen(OPERAND(scan)) >= len))
+                    (strlen(OPERAND(scan)) >= len))
                 {
                     longest = OPERAND(scan);
-                    len = cst_strlen(OPERAND(scan));
+                    len = strlen(OPERAND(scan));
                 }
             r->regmust = longest;
             r->regmlen = len;
@@ -293,8 +294,8 @@ cst_regex *hs_regcomp(const char *exp)
 
 void hs_regdelete(cst_regex *r)
 {
-    cst_free(r->program);
-    cst_free(r);
+    free(r->program);
+    free(r);
 }
 
 /*
@@ -844,7 +845,9 @@ cst_regstate *hs_regexec(const cst_regex *prog, const char *string)
             return (0);
     }
 
-    state = cst_alloc(cst_regstate, 1);
+    state = calloc(1, sizeof(cst_regstate));
+    if (state == NULL)
+        FAIL("out of space");
     /* Mark beginning of line for ^ . */
     state->bol = string;
 
@@ -855,7 +858,7 @@ cst_regstate *hs_regexec(const cst_regex *prog, const char *string)
             return state;
         else
         {
-            cst_free(state);
+            free(state);
             return NULL;
         }
     }
@@ -879,7 +882,7 @@ cst_regstate *hs_regexec(const cst_regex *prog, const char *string)
         }
         while (*s++ != '\0');
 
-    cst_free(state);
+    free(state);
     return NULL;
 }
 
@@ -978,7 +981,7 @@ static int regmatch(cst_regstate *state,
                 /* Inline the first character, for speed. */
                 if (*opnd != *state->input)
                     return (0);
-                len = cst_strlen(opnd);
+                len = strlen(opnd);
                 if (len > 1 && strncmp(opnd, state->input, len) != 0)
                     return (0);
                 state->input += len;
@@ -1152,7 +1155,7 @@ static int regrepeat(cst_regstate *state, char *p)
     switch (OP(p))
     {
     case ANY:
-        count = cst_strlen(scan);
+        count = strlen(scan);
         scan += count;
         break;
     case EXACTLY:
@@ -1305,7 +1308,7 @@ static char *regprop(char *op)
     case OPEN + 7:
     case OPEN + 8:
     case OPEN + 9:
-        cst_sprintf(buf + cst_strlen(buf), "OPEN%d", OP(op) - OPEN);
+        cst_sprintf(buf + strlen(buf), "OPEN%d", OP(op) - OPEN);
         p = NULL;
         break;
     case CLOSE + 1:
@@ -1317,7 +1320,7 @@ static char *regprop(char *op)
     case CLOSE + 7:
     case CLOSE + 8:
     case CLOSE + 9:
-        cst_sprintf(buf + cst_strlen(buf), "CLOSE%d", OP(op) - CLOSE);
+        cst_sprintf(buf + strlen(buf), "CLOSE%d", OP(op) - CLOSE);
         p = NULL;
         break;
     case STAR:
