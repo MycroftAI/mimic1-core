@@ -259,6 +259,7 @@ int main(int argc, char **argv)
             if (mimic_voice_list == NULL)
                 mimic_set_voice_list(voicedir);
             mimic_voice_list_print();
+            delete_features(extra_feats);
             exit(0);
         }
         else if (cst_streq(argv[i], "-l"))
@@ -384,6 +385,7 @@ int main(int argc, char **argv)
     if (desired_voice == 0)
     {
         fprintf(stderr, "No voice given and no voice precompiled\n");
+        delete_features(extra_feats);
         return 1;
     }
     v = desired_voice;
