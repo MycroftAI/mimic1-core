@@ -92,7 +92,7 @@ int mimic_add_voice(cst_voice *voice)
         if (mimic_voice_list)
         {                       /* Other voices -- first is default, add this second */
             x = cons_val(voice_val(voice), val_cdr(mimic_voice_list));
-            set_cdr((cst_val *) (void *) mimic_voice_list, x);
+            set_cdr(mimic_voice_list, x);
         }
         else
         {                       /* Only voice so goes on front */
@@ -110,6 +110,14 @@ int mimic_add_lang(const char *langname,
                    void (*lang_init) (cst_voice *vox),
                    cst_lexicon *(*lex_init) ())
 {
+    size_t i;
+    for (i = 0; i < mimic_lang_list_length; i++)
+    {
+        if (cst_streq(langname, mimic_lang_list[i].lang))
+        {
+            return TRUE;
+        }
+    }
     if (mimic_lang_list_length < 19)
     {
         mimic_lang_list[mimic_lang_list_length].lang = langname;
@@ -118,6 +126,10 @@ int mimic_add_lang(const char *langname,
         mimic_lang_list_length++;
         mimic_lang_list[mimic_lang_list_length].lang = NULL;
     }
+     else 
+     {
+         cst_errmsg("Error: Language limit reached, could not add: '%s'\n", langname);
+     }
 
     return TRUE;
 }
