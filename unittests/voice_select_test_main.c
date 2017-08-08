@@ -13,23 +13,14 @@
   #define A_VOICE "../voices/cmu_us_rms.flitevox"
 #endif
 
-cst_val *mimic_set_voice_list(const char *voxdir);
-
-void *mimic_set_lang_list(void);
 
 void common_init(void)
 {
     mimic_init();
-    mimic_set_lang_list();
-
-    if (mimic_voice_list == NULL)
-        mimic_set_voice_list(VOICE_LIST_DIR);
 }
 
 void test_no_voice_list(void)
 {
-    mimic_init();
-    mimic_set_lang_list();
     TEST_CHECK(mimic_voice_select("rms") == NULL);
     TEST_CHECK(mimic_voice_select(NULL) == NULL);
 }
@@ -94,7 +85,10 @@ void test_invalid_url(void)
 void test_file_voice(void)
 {
     common_init();
-    TEST_CHECK(mimic_voice_select(A_VOICE) != NULL);
+    fflush(stderr);
+    cst_voice *v;
+    v = mimic_voice_select(A_VOICE);
+    TEST_CHECK(v != NULL);
 }
 
 TEST_LIST =

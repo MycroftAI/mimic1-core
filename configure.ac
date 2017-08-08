@@ -14,7 +14,7 @@ AC_CANONICAL_BUILD
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 AC_PROG_CC
 AM_PROG_AR
-LT_INIT([dlopen win32-dll disable-static disable-shared])
+LT_INIT([dlopen win32-dll disable-static])
 AM_SILENT_RULES([yes])
 AC_PROG_INSTALL
 AC_CONFIG_SRCDIR([include/mimic.h])
@@ -24,9 +24,9 @@ AC_C_BIGENDIAN
 
 PKG_PROG_PKG_CONFIG
 
-dnl By default disable building static and shared libraries.
-dnl use ./configure --enable-shared (or --enable-static or both)
-dnl to build them.
+dnl By default enable shared libraries.
+dnl use ./configure --enable-static (and/or --disable-shared)
+dnl to build them or not.
 
 
 dnl openmp support for multi-threaded test:
@@ -90,17 +90,34 @@ AS_IF([test "x$with_hts" != "xno"],
   ])
 AM_CONDITIONAL([HTSEngineBundled], [test "x$with_hts_bundled" != "xno"])
 
-
-
 dnl: pkg-config mimic.pc file:
+PKGCONFIG_MIMIC_CORE_CFLAGS="-I${includedir}/ttsmimic -I${includedir}/ttsmimic/lang -DMIMIC_PLUGIN_DIR=@libdir@/ttsmimic/plugins"
+PKGCONFIG_MIMIC_CORE_LIBS="-L${libdir}"
+PKGCONFIG_MIMIC_CORE_DEPS=
+
+
 PKGCONFIG_MIMIC_CFLAGS="-I${includedir}/ttsmimic -I${includedir}/ttsmimic/lang"
 PKGCONFIG_MIMIC_LIBS="-L${libdir}"
-PKGCONFIG_MIMIC_DEPS=
+PKGCONFIG_MIMIC_DEPS="libttsmimiccore"
 
 dnl Check libpcre2-8
 PKG_CHECK_MODULES([PCRE2], [libpcre2-8])
-PKGCONFIG_MIMIC_DEPS="${PKGCONFIG_MIMIC_DEPS} libpcre2-8"
-                                   
+PKGCONFIG_MIMIC_CORE_DEPS="${PKGCONFIG_MIMIC_CORE_DEPS} libpcre2-8"
+
+AS_IF([test "x$enable_shared" = "xyes"],
+  [enable_plugins=yes
+   AC_SEARCH_LIBS([dlopen], [dl dld], [], [
+     AC_MSG_NOTICE([dlopen not available, disabling plugin support])
+     enable_plugins="no"])],
+  [enable_plugins=no
+   AC_MSG_NOTICE([plugins not available without shared libraries])
+  ])
+
+AS_IF([test "x$enable_plugins" != "xno"],
+  [AC_DEFINE([MIMIC_ENABLE_PLUGINS], [1], [Define if you want plugin support])
+  PKGCONFIG_MIMIC_CORE_LIBS="${PKGCONFIG_MIMIC_LIBS} -ldl"
+])
+AM_CONDITIONAL([MIMIC_ENABLE_PLUGINS], [test "x$enable_plugins" != "xno"])
 
 
 dnl
@@ -180,19 +197,19 @@ AS_CASE( [ ${AUDIODRIVER} ],
            [ AUDIODEFS="${AUDIODEFS_ALSA}"
              AUDIOLIBS="${AUDIOLIBS_ALSA}"
              AUDIODETECTED="${AUDIODETECTED_ALSA}"
-             PKGCONFIG_MIMIC_DEPS="${PKGCONFIG_MIMIC_DEPS} alsa"
+             PKGCONFIG_MIMIC_CORE_DEPS="${PKGCONFIG_MIMIC_CORE_DEPS} alsa"
            ],
          [ pulseaudio ],
            [ AUDIODEFS="${AUDIODEFS_PULSEAUDIO}"
              AUDIOLIBS="${AUDIOLIBS_PULSEAUDIO}"
              AUDIODETECTED="${AUDIODETECTED_PULSEAUDIO}"
-             PKGCONFIG_MIMIC_DEPS="${PKGCONFIG_MIMIC_DEPS} libpulse"
+             PKGCONFIG_MIMIC_CORE_DEPS="${PKGCONFIG_MIMIC_CORE_DEPS} libpulse"
            ],
          [ portaudio ],
            [ AUDIODEFS="${AUDIODEFS_PORTAUDIO}"
              AUDIOLIBS="${AUDIOLIBS_PORTAUDIO}"
              AUDIODETECTED="${AUDIODETECTED_PORTAUDIO}"
-             PKGCONFIG_MIMIC_DEPS="${PKGCONFIG_MIMIC_DEPS} portaudio-2.0"
+             PKGCONFIG_MIMIC_CORE_DEPS="${PKGCONFIG_MIMIC_CORE_DEPS} portaudio-2.0"
 	   ],
          [ sun ],
            [ AUDIODEFS="${AUDIODEFS_SUN}"
@@ -223,6 +240,7 @@ AC_SUBST(AUDIODRIVER)
 AC_SUBST(AUDIODEFS)
 AC_SUBST(AUDIOLIBS)
 
+
 dnl
 dnl language/lexicon/voice parameters 
 dnl
@@ -230,21 +248,37 @@ dnl By default all languages, lexicons and voices are compiled
 dnl --------------------- Global language switch ---------------------
 AC_ARG_ENABLE([lang-all],
   [AS_HELP_STRING([--disable-lang-all],
-      [disable all languages support])],
+      [disable all languages support])
+   AS_HELP_STRING([--enable-lang-all=plugin],
+      [build languages as plugins])
+  ],
   [],
   [enable_lang_all=yes]) dnl by default all languages are included
 
 AC_ARG_ENABLE([voices-all],
   [AS_HELP_STRING([--disable-voices-all],
-      [disable embedding all voices])],
+      [disable embedding all voices])
+   AS_HELP_STRING([--enable-voices-all=plugin],
+      [build voices as plugins])
+  ],
   [],
   [enable_voices_all=yes])
 
 AC_ARG_ENABLE([lang-english],
   [AS_HELP_STRING([--disable-lang-english],
-      [disable English language support])],
+      [disable English language support])
+   AS_HELP_STRING([--enable-lang-english=plugin],
+      [build English language support as plugin])
+  ],
   [],
   [enable_lang_english=${enable_lang_all}])
+
+AC_ARG_ENABLE([lang-grapheme],
+  [AS_HELP_STRING([--disable-lang-grapheme],
+      [disable grapheme language support])],
+  [],
+  [enable_lang_grapheme=${enable_lang_all}])
+
 
 AC_ARG_ENABLE([lang-indic],
   [AS_HELP_STRING([--disable-lang-indic],
@@ -258,43 +292,6 @@ AC_ARG_ENABLE([lang-es],
   [],
   [enable_lang_es=no])
 
-dnl -------------------- Language analysis ---------------------------
-dnl For US English en-us:
-AC_ARG_ENABLE([usenglish],
-  [AS_HELP_STRING([--disable-usenglish],
-      [disable US English text analysis support])],
-  [],
-  [enable_usenglish=${enable_lang_english}])
-
-dnl For indic:
-AC_ARG_ENABLE([indic_analysis],
-  [AS_HELP_STRING([--disable-indic-analysis],
-      [disable indic text analysis support])],
-  [],
-  [enable_indic_analysis=${enable_lang_indic}])
-
-AC_ARG_ENABLE([es_analysis],
-  [AS_HELP_STRING([--disable-es-analysis],
-      [disable Spanish text analysis support])],
-  [],
-  [enable_es_analysis=${enable_lang_es}])
-
-
-dnl ------------------- Lexicons ------------------------------
-dnl US Lexicon:
-AC_ARG_ENABLE([cmulex],
-  [AS_HELP_STRING([--disable-cmulex],
-      [disable US English CMU Lexicon support])],
-  [],
-  [enable_cmulex=${enable_lang_english}])
-
-
-dnl indic Lexicons:
-AC_ARG_ENABLE([indiclex],
-  [AS_HELP_STRING([--disable-indiclex],
-      [disable indic and grapheme Lexicon support])],
-  [],
-  [enable_indiclex=${enable_lang_indic}])
 
 dnl ----------------- Voices -------------------------------
 
@@ -312,9 +309,8 @@ AC_ARG_ENABLE([cmu_us_kal],
   [enable_cmu_us_kal=${enable_voices_english}])
 
 dnl: Dependencies for cmu_us_kal
-AS_IF([test "x$enable_cmu_us_kal" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_kal" != xno -a "x${enable_lang_english}" = "xno" ],
+  [enable_lang_english="yes"])
 
 dnl cmu_time_awb
 AC_ARG_ENABLE([cmu_time_awb],
@@ -324,9 +320,8 @@ AC_ARG_ENABLE([cmu_time_awb],
   [enable_cmu_time_awb=${enable_voices_english}])
 
 dnl: Dependencies for cmu_time_awb
-AS_IF([test "x$enable_cmu_time_awb" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_time_awb" != xno -a "x${enable_lang_english}" = "xno" ],
+  [enable_lang_english="yes"])
 
 dnl cmu_us_kal16
 AC_ARG_ENABLE([cmu_us_kal16],
@@ -336,9 +331,8 @@ AC_ARG_ENABLE([cmu_us_kal16],
   [enable_cmu_us_kal16=${enable_voices_english}])
 
 dnl: Dependencies for cmu_us_kal16
-AS_IF([test "x$enable_cmu_us_kal16" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_kal16" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 dnl cmu_us_awb
 AC_ARG_ENABLE([cmu_us_awb],
@@ -348,9 +342,8 @@ AC_ARG_ENABLE([cmu_us_awb],
   [enable_cmu_us_awb=${enable_voices_english}])
 
 dnl: Dependencies for cmu_us_awb
-AS_IF([test "x$enable_cmu_us_awb" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_awb" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 dnl cmu_us_rms
 AC_ARG_ENABLE([cmu_us_rms],
@@ -360,9 +353,8 @@ AC_ARG_ENABLE([cmu_us_rms],
   [enable_cmu_us_rms=${enable_voices_english}])
 
 dnl: Dependencies for cmu_us_rms
-AS_IF([test "x$enable_cmu_us_rms" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_rms" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 dnl cmu_us_slt
 AC_ARG_ENABLE([cmu_us_slt],
@@ -372,9 +364,8 @@ AC_ARG_ENABLE([cmu_us_slt],
   [enable_cmu_us_slt=${enable_voices_english}])
 
 dnl: Dependencies for cmu_us_slt
-AS_IF([test "x$enable_cmu_us_slt" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_slt" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 
 dnl cmu_us_slt_hts
@@ -390,9 +381,8 @@ AS_IF([test "x$enable_cmu_us_slt_hts" != "xno" -a "x$with_hts" = "xno"],
     [])
 
 dnl: Dependencies for cmu_us_slt_hts
-AS_IF([test "x$enable_cmu_us_slt_hts" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_cmu_us_slt_hts" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 
 dnl vid_gb_ap
@@ -403,109 +393,170 @@ AC_ARG_ENABLE([vid_gb_ap],
   [enable_vid_gb_ap=${enable_voices_english}])
 
 dnl: Dependencies for vid_gb_ap
-AS_IF([test "x$enable_vid_gb_ap" != xno],
-  [enable_usenglish="yes"
-   enable_cmulex="yes"])
+AS_IF([test "x$enable_vid_gb_ap" != xno -a "x${enable_lang_english}" = "xno"],
+  [enable_lang_english="yes"])
 
 dnl To generate the pkg-config file .pc we want the libraries in the order
 dnl the linker will need them. For that reason, we first list voices, then
-dnl lexicons then languages and we append the lib required on each case.
+dnl languages and we append the lib required on each case.
 
 AM_CONDITIONAL([VOICE_CMU_US_KAL], [test "x$enable_cmu_us_kal" != xno])
 AS_IF([test "x$enable_cmu_us_kal" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_KAL], [1], [Enable cmu_us_kal voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_kal"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_kal"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_KAL], [0], [Enable cmu_us_kal voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_KAL_BUILTIN], [test "x$enable_cmu_us_kal" = "xyes"])
+AS_IF([test "x${enable_cmu_us_kal}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_KAL_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_KAL_BUILTIN],[0],[Do we link the voice at compilation time?])])
 
 AM_CONDITIONAL([VOICE_CMU_TIME_AWB], [test "x$enable_cmu_time_awb" != xno])
 AS_IF([test "x$enable_cmu_time_awb" != xno ],
   [ AC_DEFINE([ENABLE_CMU_TIME_AWB], [1], [Enable cmu_time_awb voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_time_awb"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_time_awb"
   ],
   [ AC_DEFINE([ENABLE_CMU_TIME_AWB], [0], [Enable cmu_time_awb voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_TIME_AWB_BUILTIN], [test "x$enable_cmu_time_awb" = "xyes"])
+AS_IF([test "x${enable_cmu_time_awb}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_TIME_AWB_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_TIME_AWB_BUILTIN],[0],[Do we link the voice at compilation time?])])
+
 
 AM_CONDITIONAL([VOICE_CMU_US_KAL16], [test "x$enable_cmu_us_kal16" != xno])
 AS_IF([test "x$enable_cmu_us_kal16" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_KAL16], [1], [Enable cmu_us_kal16 voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_kal16"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_kal16"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_KAL16], [0], [Enable cmu_us_kal16 voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_KAL16_BUILTIN], [test "x$enable_cmu_us_kal16" = "xyes"])
+AS_IF([test "x${enable_cmu_us_kal16}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_KAL16_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_KAL16_BUILTIN],[0],[Do we link the voice at compilation time?])])
+
 
 AM_CONDITIONAL([VOICE_CMU_US_AWB], [test "x$enable_cmu_us_awb" != xno])
 AS_IF([test "x$enable_cmu_us_awb" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_AWB], [1], [Enable cmu_us_awb voice]) 
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_awb"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_awb"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_AWB], [0], [Enable cmu_us_awb voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_AWB_BUILTIN], [test "x$enable_cmu_us_awb" = "xyes"])
+AS_IF([test "x${enable_cmu_us_awb}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_AWB_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_AWB_BUILTIN],[0],[Do we link the voice at compilation time?])])
+
 
 AM_CONDITIONAL([VOICE_CMU_US_RMS], [test "x$enable_cmu_us_rms" != xno])
 AS_IF([test "x$enable_cmu_us_rms" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_RMS], [1], [Enable cmu_us_rms voice]) 
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_rms"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_rms"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_RMS], [0], [Enable cmu_us_rms voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_RMS_BUILTIN], [test "x$enable_cmu_us_rms" = "xyes"])
+AS_IF([test "x${enable_cmu_us_rms}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_RMS_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_RMS_BUILTIN],[0],[Do we link the voice at compilation time?])])
+
 
 AM_CONDITIONAL([VOICE_CMU_US_SLT], [test "x$enable_cmu_us_slt" != xno])
 AS_IF([test "x$enable_cmu_us_slt" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_SLT], [1], [Enable cmu_us_slt voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_slt"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_slt"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_SLT], [0], [Enable cmu_us_slt voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_SLT_BUILTIN], [test "x$enable_cmu_us_slt" = "xyes"])
+AS_IF([test "x${enable_cmu_us_slt}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_SLT_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_SLT_BUILTIN],[0],[Do we link the voice at compilation time?])])
 
 AM_CONDITIONAL([VOICE_CMU_US_SLT_HTS], [test "x$enable_cmu_us_slt_hts" != xno])
 AS_IF([test "x$enable_cmu_us_slt_hts" != xno ],
   [ AC_DEFINE([ENABLE_CMU_US_SLT_HTS], [1], [Enable cmu_us_slt_hts voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_us_slt_hts"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_cmu_us_slt_hts"
   ],
   [ AC_DEFINE([ENABLE_CMU_US_SLT_HTS], [0], [Enable cmu_us_slt_hts voice]) ])
+
+AM_CONDITIONAL([ENABLE_CMU_US_SLT_HTS_BUILTIN], [test "x$enable_cmu_us_slt_hts" = "xyes"])
+AS_IF([test "x${enable_cmu_us_slt_hts}" = "xyes" ],
+  [AC_DEFINE([ENABLE_CMU_US_SLT_HTS_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_CMU_US_SLT_HTS_BUILTIN],[0],[Do we link the voice at compilation time?])])
 
 
 AM_CONDITIONAL([VOICE_VID_GB_AP], [test "x$enable_vid_gb_ap" != xno])
 AS_IF([test "x$enable_vid_gb_ap" != xno ],
   [ AC_DEFINE([ENABLE_VID_GB_AP], [1], [Enable vid_gb_ap voice])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_vid_gb_ap"
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_vid_gb_ap"
   ],
   [ AC_DEFINE([ENABLE_VID_GB_AP], [0], [Enable vid_gb_ap voice]) ])
 
-AM_CONDITIONAL([LEX_CMULEX], [test "x$enable_cmulex" != xno])
-AS_IF([test "x$enable_cmulex" != xno ],
-  [ AC_DEFINE([ENABLE_CMULEX], [1], [Enable CMU US English lexicon])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmulex"
+AM_CONDITIONAL([ENABLE_VID_GB_AP_BUILTIN], [test "x$enable_vid_gb_ap" = "xyes"])
+AS_IF([test "x${enable_vid_gb_ap}" = "xyes" ],
+  [AC_DEFINE([ENABLE_VID_GB_AP_BUILTIN],[1],[Do we link the voice at compilation time?])],
+  [AC_DEFINE([ENABLE_VID_GB_AP_BUILTIN],[0],[Do we link the voice at compilation time?])])
+
+
+AM_CONDITIONAL([LANG_INDIC], [test "x$enable_lang_indic" != xno])
+AS_IF([test "x$enable_lang_indic" != xno ],
+  [ AC_DEFINE([ENABLE_LANG_INDIC], [1], [Enable Indic language])
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_indic"
   ],
-  [ AC_DEFINE([ENABLE_CMULEX], [0], [Enable CMU US English lexicon]) ])
+  [ AC_DEFINE([ENABLE_LANG_INDIC], [0], [Enable Indic language]) ])
 
-AM_CONDITIONAL([LEX_INDIC], [test "x$enable_indiclex" != xno])
-AS_IF([test "x$enable_indiclex" != xno ],
-  [ AC_DEFINE([ENABLE_INDICLEX], [1], [Enable Indic lexicon])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_indic_lex"
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_grapheme_lex"
+AM_CONDITIONAL([ENABLE_LANG_INDIC_BUILTIN], [test "x$enable_lang_indic" = "xyes"])
+AS_IF([test "x${enable_lang_indic}" = "xyes" ],
+  [AC_DEFINE([ENABLE_LANG_INDIC_BUILTIN],[1],[Do we link the language at compilation time?])],
+  [AC_DEFINE([ENABLE_LANG_INDIC_BUILTIN],[0],[Do we link the language at compilation time?])])
+
+AM_CONDITIONAL([LANG_GRAPHEME], [test "x$enable_lang_grapheme" != xno])
+AS_IF([test "x$enable_lang_grapheme" != xno ],
+  [ AC_DEFINE([ENABLE_LANG_GRAPHEME], [1], [Enable Grapheme language support])
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_grapheme"
   ],
-  [ AC_DEFINE([ENABLE_INDICLEX], [0], [Enable Indic lexicon]) ])
+  [ AC_DEFINE([ENABLE_LANG_GRAPHEME], [0], [Enable Grapheme language support]) ])
 
-AM_CONDITIONAL([LANG_INDIC_ANALYSIS],
-  [test "x$enable_indic_analysis" != xno])
-AS_IF([test "x$enable_indic_analysis" != xno ],
-  [ AC_DEFINE([ENABLE_INDIC_ANALYSIS], [1], [Enable Indic text analysis])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_grapheme_lang"
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_cmu_indic_lang"
-  ],
-  [ AC_DEFINE([ENABLE_INDIC_ANALYSIS], [0], [Enable Indic text analysis]) ])
-
-AM_CONDITIONAL([LANG_USENGLISH], [test "x$enable_usenglish" != xno])
-AS_IF([test "x$enable_usenglish" != xno ],
-  [ AC_DEFINE([ENABLE_USENGLISH], [1], [Enable US English text analysis])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_usenglish" ],
-  [ AC_DEFINE([ENABLE_USENGLISH], [0], [Enable US English text analysis]) ])
-
-AM_CONDITIONAL([LANG_ES_ANALYSIS], [test "x$enable_es_analysis" != xno])
-AS_IF([test "x$enable_es_analysis" != xno ],
-  [ AC_DEFINE([ENABLE_ES_ANALYSIS], [1], [Enable Spanish text analysis])
-    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_es" ],
-  [ AC_DEFINE([ENABLE_ES_ANALYSIS], [0], [Enable Spanish text analysis]) ])
+AM_CONDITIONAL([ENABLE_LANG_GRAPHEME_BUILTIN], [test "x$enable_lang_grapheme" = "xyes"])
+AS_IF([test "x${enable_lang_grapheme}" = "xyes" ],
+  [AC_DEFINE([ENABLE_LANG_GRAPHEME_BUILTIN],[1],[Do we link the language at compilation time?])],
+  [AC_DEFINE([ENABLE_LANG_GRAPHEME_BUILTIN],[0],[Do we link the language at compilation time?])])
 
 
-PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_lang_all_langs -lttsmimic_lang_all_voices -lttsmimic"
+AM_CONDITIONAL([LANG_ENGLISH], [test "x$enable_lang_english" != "xno"])
+AS_IF([test "x$enable_lang_english" != "xno" ],
+  [ AC_DEFINE([ENABLE_LANG_ENGLISH], [1], [Enable US English language])
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_usenglish" ],
+  [ AC_DEFINE([ENABLE_LANG_ENGLISH], [0], [Enable US English language]) ])
+
+AM_CONDITIONAL([ENABLE_LANG_ENGLISH_BUILTIN], [test "x$enable_lang_english" = "xyes"])
+AS_IF([test "x${enable_lang_english}" = "xyes" ],
+  [AC_DEFINE([ENABLE_LANG_ENGLISH_BUILTIN],[1],[Do we link the language at compilation time?])],
+  [AC_DEFINE([ENABLE_LANG_ENGLISH_BUILTIN],[0],[Do we link the language at compilation time?])])
+
+
+AM_CONDITIONAL([LANG_ES], [test "x$enable_lang_es" != xno])
+AS_IF([test "x$enable_lang_es" != xno ],
+  [ AC_DEFINE([ENABLE_LANG_ES], [1], [Enable Spanish language])
+    PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimic_es" ],
+  [ AC_DEFINE([ENABLE_LANG_ES], [0], [Enable Spanish language]) ])
+
+AM_CONDITIONAL([ENABLE_LANG_ES_BUILTIN], [test "x$enable_lang_es" = "xyes"])
+AS_IF([test "x${enable_lang_es}" = "xyes" ],
+  [AC_DEFINE([ENABLE_LANG_ES_BUILTIN],[1],[Do we link the language at compilation time?])],
+  [AC_DEFINE([ENABLE_LANG_ES_BUILTIN],[0],[Do we link the language at compilation time?])])
+
+
+
+PKGCONFIG_MIMIC_LIBS="${PKGCONFIG_MIMIC_LIBS} -lttsmimiccore"
+
+AC_SUBST(PKGCONFIG_MIMIC_CORE_CFLAGS)
+AC_SUBST(PKGCONFIG_MIMIC_CORE_LIBS)
+AC_SUBST(PKGCONFIG_MIMIC_CORE_DEPS)
 
 AC_SUBST(PKGCONFIG_MIMIC_CFLAGS)
 AC_SUBST(PKGCONFIG_MIMIC_LIBS)
@@ -513,7 +564,12 @@ AC_SUBST(PKGCONFIG_MIMIC_DEPS)
 
 AC_SUBST(EXEEXT)
 
-AC_CONFIG_FILES([Makefile mimic.pc])
+LIBPREFIX="lib"
+LIBEXTENSION="so"
+AC_DEFINE([MIMIC_PLUGIN_PREFIX], ["libttsmimic_"], [Prefix used in plugins])
+AC_DEFINE([MIMIC_PLUGIN_EXT], ["so"], [Extension used in plugins])
+
+AC_CONFIG_FILES([Makefile libttsmimiccore.pc libttsmimic.pc])
 AC_OUTPUT
 
 AS_IF( [ test "${AUDIODRIVER}" = "none" && test "$with_audio" != "none" ],

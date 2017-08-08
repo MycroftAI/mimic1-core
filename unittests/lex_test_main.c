@@ -45,11 +45,11 @@
 /*************************************************************************/
 #include <stdio.h>
 #include "cst_lexicon.h"
+#include "lang/cmulex/cmu_lex.h"
 
 #include "cutest.h"
 
 extern cst_lexicon cmu_lex;
-void cmu_lex_init();
 
 static void
 lookup_and_test(cst_lexicon *l, const char *word,

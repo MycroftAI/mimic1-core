@@ -50,9 +50,6 @@
 
 #include "mimic.h"
 
-cst_val *mimic_set_voice_list(const char *voxdir);
-void *mimic_set_lang_list(void);
-
 void cst_alloc_debug_summary();
 
 /* Its not very appropriate that these are declared here */
@@ -110,7 +107,6 @@ static void mimic_usage()
            "  -b          Benchmark mode\n"
            "  -l          Loop endlessly\n"
            "  -voice NAME Use voice NAME (NAME can be filename or url too)\n"
-           "  -voicedir NAME Directory contain voice data\n"
            "  -lv         List voices available\n"
            "  -add_lex FILENAME add lex addenda from FILENAME\n"
            "  -pw         Print words\n"
@@ -210,7 +206,6 @@ int main(int argc, char **argv)
     const char *filename;
     const char *outtype;
     cst_voice *desired_voice = 0;
-    const char *voicedir = NULL;
     int i;
 	int err;
     float durs;
@@ -240,7 +235,6 @@ int main(int argc, char **argv)
     extra_feats = new_features();
 
     mimic_init();
-    mimic_set_lang_list();      /* defined at compilation time */
 
     for (i = 1; i < argc; i++)
     {
@@ -256,8 +250,6 @@ int main(int argc, char **argv)
             mimic_verbose = TRUE;
         else if (cst_streq(argv[i], "-lv"))
         {
-            if (mimic_voice_list == NULL)
-                mimic_set_voice_list(voicedir);
             mimic_voice_list_print();
             delete_features(extra_feats);
             exit(0);
@@ -276,16 +268,7 @@ int main(int argc, char **argv)
         }
         else if ((cst_streq(argv[i], "-voice")) && (i + 1 < argc))
         {
-            if (mimic_voice_list == NULL)
-                mimic_set_voice_list(voicedir);
             desired_voice = mimic_voice_select(argv[i + 1]);
-            i++;
-        }
-        else if ((cst_streq(argv[i], "-voicedir")) && (i + 1 < argc))
-        {
-            voicedir = argv[i + 1];
-            if (mimic_voice_list == NULL)
-                mimic_set_voice_list(voicedir);
             i++;
         }
         else if ((cst_streq(argv[i], "-add_lex")) && (i + 1 < argc))
@@ -377,8 +360,6 @@ int main(int argc, char **argv)
 
     if (filename == NULL)
         filename = "-";         /* stdin */
-    if (mimic_voice_list == NULL)
-        mimic_set_voice_list(voicedir);
     if (desired_voice == 0)
         desired_voice = mimic_voice_select(NULL);
 

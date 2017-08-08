@@ -65,13 +65,15 @@ extern "C" {
 #include "cst_synth.h"
 #include "cst_units.h"
 #include "cst_tokenstream.h"
+#include "cst_plugins.h"
+#include "cst_builtin_plugins.h"
 
     extern cst_val *mimic_voice_list;
     extern cst_lang mimic_lang_list[20];
 
 /* Public functions */
-    int mimic_init();
-    int mimic_exit();
+    int mimic_core_init();
+    int mimic_core_exit();
 
 /* General top level functions */
     cst_voice *mimic_voice_select(const char *name);

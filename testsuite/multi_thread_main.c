@@ -51,18 +51,9 @@ cst_voice *voice;
 
 cst_voice *register_cmu_us_slt(const char *voxdir);
 
-cst_val *mimic_set_voice_list(const char *voxdir)
-{
-    mimic_voice_list =
-        cons_val(voice_val(register_cmu_us_slt(voxdir)), mimic_voice_list);
-    mimic_voice_list = val_reverse(mimic_voice_list);
-    return mimic_voice_list;
-}
-
 void init()
 {
     mimic_init();
-    mimic_set_voice_list(NULL);
     voice = mimic_voice_select("cmu_us_slt");
 
 }

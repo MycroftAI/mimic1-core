@@ -15,28 +15,30 @@
   #define A_VOICE "../voices/cmu_us_rms.flitevox"
 #endif
 
-
-cst_val *mimic_set_voice_list(const char *voxdir);
-
-void *mimic_set_lang_list(void);
-
 void common_init(void)
 {
     mimic_init();
-    mimic_set_lang_list();
-
-    if (mimic_voice_list == NULL)
-        mimic_set_voice_list(VOICE_LIST_DIR);
 }
 
 
 void test_copy(void)
 {
+   common_init();
    cst_voice *v = NULL;
    cst_wave *w1, *w2;
    common_init();
    v = mimic_voice_select(A_VOICE);
+   if (v == NULL)
+   {
+       fprintf(stderr, "\nSkipping copy_wave test, as a voice is required and none is available\n");
+       return;
+   }
    w1 = mimic_text_to_wave("Hello", v);
+   if (w1 == NULL)
+   {
+       fprintf(stderr, "\nSkipping copy_wave test, as a text to wave failed\n");
+       return;
+   }
    w2 = copy_wave(w1);
    TEST_CHECK(w1 != w2);
    TEST_CHECK(w1->num_samples == w2->num_samples);
@@ -57,8 +59,23 @@ void test_concat(void)
    cst_voice *v;
    common_init();
    v = mimic_voice_select(A_VOICE);
+   if (v == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a voice is required and none is available\n");
+       return;
+   }
    w1 = mimic_text_to_wave("Hello", v);
+   if (w1 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    w2 = mimic_text_to_wave("There", v);
+   if (w2 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    original_len = w1->num_samples;
    concat_wave(w1, w2);
    TEST_CHECK(w1->num_samples == w2->num_samples + original_len);
@@ -66,7 +83,17 @@ void test_concat(void)
    delete_wave(w2);
 
    w1 = mimic_text_to_wave("Hello", v);
+   if (w1 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    w2 = mimic_text_to_wave("There", v);
+   if (w2 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    
    w2->sample_rate *= 2; // create sample rate mismatch
    fprintf(stderr, "\nExpect error message below:\n");
@@ -79,7 +106,17 @@ void test_concat(void)
    delete_wave(w2);
 
    w1 = mimic_text_to_wave("Hello", v);
+   if (w1 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    w2 = mimic_text_to_wave("There", v);
+   if (w2 == NULL)
+   {
+       fprintf(stderr, "\nSkipping concat_wave test, as a text to wave failed\n");
+       return;
+   }
    
    w2->num_channels *= 2; // create channel number mismatch
    fprintf(stderr, "Expect error message below:\n");

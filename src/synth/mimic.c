@@ -37,14 +37,23 @@
 /*  Basic user level functions                                           */
 /*                                                                       */
 /*************************************************************************/
+#include "config.h"
 #include <errno.h>
 #include "cst_tokenstream.h"
 #include "mimic.h"
 #include "cst_alloc.h"
+#include "cst_error.h"
 #include "cst_clunits.h"
 #include "cst_cg.h"
 #include "cst_audio.h"
+#include "cst_plugins.h"
 
+/* TODO: Define a public mimic API */
+
+/* TODO: Create a mimic_state struct that contains all global variables
+ * and is returned at mimic_init and passed as needed
+ * through the mimic API */
+ 
 /* This is a global, which isn't ideal, this may change */
 /* It is set when mimic_set_voice_list() is called which happens in */
 /* mimic_main() */
@@ -52,15 +61,14 @@ cst_val *mimic_voice_list = 0;
 cst_lang mimic_lang_list[20];
 int mimic_lang_list_length = 0;
 
-int mimic_init()
+int mimic_core_init()
 {
     cst_regex_init();
     mimic_audio_init();
-
     return 0;
 }
 
-int mimic_exit()
+int mimic_core_exit()
 {
     mimic_audio_exit();
     return 0;
