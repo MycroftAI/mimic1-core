@@ -45,6 +45,10 @@
 #include <stdio.h>
 mimic_plugin_handler_t** mimic_plugins;
 
+#ifndef MIMIC_PLUGIN_DIR
+#error Missing MIMIC_PLUGIN_DIR definition
+#endif
+
 static const char* mimic_plugin_dir = MIMIC_PLUGIN_DIR;
 const char* mimic_get_plugin_dir()
 {
@@ -108,6 +112,7 @@ const char* mimic_get_plugin_dir()
        DIR *d;
        struct dirent *dir;
        size_t fn_length;
+       const char* plugindir = mimic_get_plugin_dir();
        size_t prefix_length = strlen(MIMIC_PLUGIN_PREFIX);
        size_t ext_length = strlen(MIMIC_PLUGIN_EXT);
        size_t num_plugins = 0;
@@ -118,7 +123,16 @@ const char* mimic_get_plugin_dir()
          cst_errmsg("Error allocating memory");
          return 0;
        }
-       d = opendir(mimic_get_plugin_dir());
+       if (plugindir == NULL)
+       {
+          cst_errmsg("MIMIC_PLUGIN_DIR not set. Plugins not loaded");
+          (*pluginlist)[num_plugins] = NULL;
+          return num_plugins;
+       } else
+       {
+          cst_errmsg("Loading plugins from: %s\n", plugindir);
+       }
+       d = opendir(plugindir);
        if (d != NULL)
        {
          while ((dir = readdir(d)) != NULL)
@@ -132,15 +146,32 @@ const char* mimic_get_plugin_dir()
                if (num_plugins < num_plugins_max)
                {
                  printf("Loading: %s\n", dir->d_name);
-                 (*pluginlist)[num_plugins] = cst_strdup(dir->d_name);
+                 char *fullfile = cst_alloc(char, strlen(plugindir) + strlen(dir->d_name) + 2);
+                 if (fullfile == NULL)
+                 {
+                     cst_errmsg("Error allocating memory\n");
+                     closedir(d);
+                     return num_plugins;
+                 }
+                 int ret = snprintf(fullfile, strlen(plugindir) + strlen(dir->d_name) + 2, "%s/%s", plugindir, dir->d_name);
+                 if (ret < 0 || ret >= strlen(plugindir) + strlen(dir->d_name) + 2)
+                 {
+                     cst_errmsg("Plugin name length too large:"); /* Should not happen */
+                 }
+                 (*pluginlist)[num_plugins] = fullfile;
                } else
                {
+                 cst_errmsg("Maximum number of plugins reached\n"); /* FIXME: Make it dynamic */
+                 closedir(d);
                  return num_plugins_max;
                }
                num_plugins++;
            }
          }
          closedir(d);
+       } else
+       {
+           cst_errmsg("Could not open plugin directory: '%s'\n", plugindir);
        }
       (*pluginlist)[num_plugins] = NULL;
       return num_plugins;
@@ -158,19 +189,19 @@ const char* mimic_get_plugin_dir()
         handle = LoadLibrary(filename);
         if (handle == NULL)
         {
-            cst_errmsg("Cannot load %s: %s", filename, dlerror ());
+            cst_errmsg("Cannot load %s: %s\n", filename, dlerror ());
             return NULL;
         }
         mimic_plugin_t* plugin = (mimic_plugin_t*)GetProcAddress(handle, "mimic_plugin");
         if (plugin == NULL)
         {
-            cst_errmsg("Cannot find symbol mimic_plugin in file: %s", filename);
+            cst_errmsg("Cannot find symbol mimic_plugin in file: %s\n", filename);
             return NULL;
         }
         plug_hdl = cst_alloc(mimic_plugin_handler_t, 1);
         if (plug_hdl == NULL)
         {
-              cst_errmsg("Memory allocation error");
+              cst_errmsg("Memory allocation error\n");
               return NULL;
         }
         plug_hdl->handle = handle;
@@ -195,7 +226,7 @@ const char* mimic_get_plugin_dir()
       *pluginlist = (char **) malloc((num_plugins_max+1)*sizeof(char*));
       if (*pluginlist == NULL)
       {
-        cst_errmsg("Error allocating memory");
+        cst_errmsg("Error allocating memory\n");
         return 0;
       }
 
@@ -224,7 +255,7 @@ const char* mimic_get_plugin_dir()
           numplugins++;
         } else
         {
-          cst_errmsg("Maximum number of loaded plugins reached");
+          cst_errmsg("Maximum number of loaded plugins reached\n");/* FIXME: Dynamic maximum */
           FindClose(hFind);
           free(sPath);
           return num_plugins_max;
