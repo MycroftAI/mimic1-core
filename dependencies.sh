@@ -68,11 +68,12 @@ PCRE was successfully compiled. However, it could not be installed.
 The most likely cause is a lack of permissions. This script will try to run
 the installation with sudo asking your password.
 EOF
-    sudo make install && echo "PCRE2 installation succeeded" || (
+    sudo make install && sudo /sbin/ldconfig && echo "PCRE2 installation succeeded" || (
       cat << EOF
 The installation failed. Please run this or check other possible errors:
   cd "${WORKDIR}/thirdparty/build_pcre2"
   sudo make install
+  sudo /sbin/ldconfig
 In case you do not have admin permissions you can install everything to a custom
 directory by running dependencies.sh with --prefix="/a/writable/directory"
 EOF

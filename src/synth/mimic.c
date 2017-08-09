@@ -65,11 +65,13 @@ int mimic_core_init()
 {
     cst_regex_init();
     mimic_audio_init();
+    mimic_plugins_init();
     return 0;
 }
 
 int mimic_core_exit()
 {
+    mimic_plugins_exit();
     mimic_audio_exit();
     return 0;
 }

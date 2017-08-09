@@ -234,13 +234,14 @@ int main(int argc, char **argv)
     ssml_mode = FALSE;
     extra_feats = new_features();
 
-    mimic_init();
+    mimic_core_init();
 
     for (i = 1; i < argc; i++)
     {
         if (cst_streq(argv[i], "--version"))
         {
             mimic_version();
+            mimic_core_exit();
             return 1;
         }
         else if (cst_streq(argv[i], "-h") || cst_streq(argv[i], "--help")
@@ -367,6 +368,7 @@ int main(int argc, char **argv)
     {
         fprintf(stderr, "No voice given and no voice precompiled\n");
         delete_features(extra_feats);
+        mimic_core_exit();
         return 1;
     }
     v = desired_voice;
@@ -436,6 +438,6 @@ int main(int argc, char **argv)
     mimic_voice_list = 0;
     /*    cst_alloc_debug_summary(); */
 
-    mimic_exit();
+    mimic_core_exit();
     return 0;
 }

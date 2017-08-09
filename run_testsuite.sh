@@ -132,15 +132,6 @@ crosscompile_mimic()
     make -j ${NCORES} &&  make install ) || exit 1
 }
 
-put_dll_in_bindir()
-{
-    # Portaudio libraries are installed into lib. wine can't find them.
-    # Copy all libs to ${MIMIC_INSTALL_DIR}/bin
-    for file in `ls "${MIMIC_INSTALL_DIR}/lib/"*.dll`; do
-        cp "$file" "${MIMIC_INSTALL_DIR}/bin/"
-    done
-}
-
 fix_portaudio_pc_file()
 {
   # can't find uuid in mingw. I just remove it and hope mimic still works.
@@ -158,18 +149,6 @@ set_build_and_install_dir()
     export WORKDIR=`pwd`"/builds/${WHAT_TO_RUN}"
     mkdir -p "${MIMIC_INSTALL_DIR}"
     mkdir -p "${WORKDIR}"
-}
-
-test_windows_build()
-{
-    # Test mimic:
-    cd "$WORKDIR" || exit 1
-    if [ "x${DISPLAY}" = "x" ]; then
-      xvfb-run wine "${MIMIC_INSTALL_DIR}/bin/mimic.exe" -voice ap -t "hello world" "hello_world_winbuild.wav" || exit 1
-    else
-      wine "${MIMIC_INSTALL_DIR}/bin/mimic.exe" -voice ap -t "hello world" "hello_world_winbuild.wav" || exit 1
-    fi
-    echo "fbe80cc64ed244c0ee02c62a8489f182  hello_world_winbuild.wav" | md5sum -c || exit 1
 }
 
 set_windows_triplet()
@@ -381,8 +360,6 @@ case "${WHAT_TO_RUN}" in
     crosscompile_dependencies
     crosscompile_portaudio --disable-shared --enable-static
     crosscompile_mimic  --disable-shared --enable-static --with-audio=portaudio
-    put_dll_in_bindir
-    test_windows_build
     ;;
   winbuild_shared)
     set_build_and_install_dir
@@ -392,8 +369,6 @@ case "${WHAT_TO_RUN}" in
     crosscompile_portaudio --enable-shared
     fix_portaudio_pc_file
     crosscompile_mimic --enable-shared --with-audio=portaudio
-    put_dll_in_bindir
-    test_windows_build
     ;;
   *)
     echo "Unknown WHAT_TO_RUN: ${WHAT_TO_RUN}"

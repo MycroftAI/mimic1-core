@@ -6,470 +6,28 @@ SUBDIRS = .
 
 # instead of pkgincludedir we will use $(includedir)/ttsmimic
 headersdir = $(includedir)/ttsmimic/
-langheaderdir = $(headersdir)/lang/
 
-EXTRA_DIST = ACKNOWLEDGEMENTS COPYING 
+EXTRA_DIST = ACKNOWLEDGEMENTS COPYING dependencies.sh thirdparty/pcre2.patch run_testsuite.sh
 noinst_HEADERS = 
 headers_HEADERS =
-langheader_HEADERS =
 lib_LTLIBRARIES =
 
-lib_LTLIBRARIES += libttsmimiccore.la libttsmimic.la
+lib_LTLIBRARIES += libttsmimiccore.la
 libttsmimiccore_la_SOURCES = 
 libttsmimiccore_la_CFLAGS =
 libttsmimiccore_la_LDFLAGS = -no-undefined
 libttsmimiccore_la_LIBADD = $(PCRE2_LIBS)
 
-libttsmimic_la_SOURCES = src/utils/cst_builtin_plugins.c
-libttsmimic_la_CFLAGS =
-libttsmimic_la_LDFLAGS = -no-undefined
-libttsmimic_la_LIBADD = libttsmimiccore.la
 
 TESTS = 
 
 pkgconfiginstalldir = $(libdir)/pkgconfig
-pkgconfiginstall_DATA = libttsmimic.pc libttsmimiccore.pc
+pkgconfiginstall_DATA = libttsmimiccore.pc
 
 voicesinstalldir = $(pkgdatadir)/voices
 voicesinstall_DATA = 
 
-################## START: LANG_ENGLISH #################################
-if LANG_ENGLISH
-  lib_LTLIBRARIES += libttsmimic_usenglish.la
-libttsmimic_usenglish_la_LIBADD = libttsmimiccore.la
-if ENABLE_LANG_ENGLISH_BUILTIN
-libttsmimic_la_LIBADD += libttsmimic_usenglish.la
-endif
-endif
-
-EXTRA_DIST += \
-  lang/usenglish/make_us_regexes \
-  lang/usenglish/us_pos.tree
-
-libttsmimic_usenglish_la_SOURCES = \
-  lang/usenglish/us_aswd.c \
-  lang/usenglish/us_dur_stats.c \
-  lang/usenglish/us_durz_cart.c \
-  lang/usenglish/us_durz_cart.h \
-  lang/usenglish/usenglish.c \
-  lang/usenglish/usenglish_plugin.c \
-  lang/usenglish/us_expand.c \
-  lang/usenglish/us_f0lr.c \
-  lang/usenglish/us_f0_model.c \
-  lang/usenglish/us_ffeatures.c \
-  lang/usenglish/us_gpos.c \
-  lang/usenglish/us_int_accent_cart.c \
-  lang/usenglish/us_int_accent_cart.h \
-  lang/usenglish/us_int_tone_cart.c \
-  lang/usenglish/us_int_tone_cart.h \
-  lang/usenglish/us_nums_cart.c \
-  lang/usenglish/us_nums_cart.h \
-  lang/usenglish/us_phoneset.c \
-  lang/usenglish/us_phrasing_cart.c \
-  lang/usenglish/us_phrasing_cart.h \
-  lang/usenglish/us_pos_cart.c \
-  lang/usenglish/us_pos_cart.h \
-  lang/usenglish/us_text.c
-
-libttsmimic_usenglish_la_SOURCES += \
-  lang/cmulex/cmu_lex.c \
-  lang/cmulex/cmu_lex_data.c \
-  lang/cmulex/cmu_lex_entries.c \
-  lang/cmulex/cmu_lts_model.c \
-  lang/cmulex/cmu_lts_model.h \
-  lang/cmulex/cmu_lts_rules.c \
-  lang/cmulex/cmu_postlex.c
-
-EXTRA_DIST += \
-  lang/cmulex/cmu_lex_data_raw.c \
-  lang/cmulex/cmu_lex_entries_huff_table.c \
-  lang/cmulex/cmu_lex_num_bytes.c \
-  lang/cmulex/cmu_lex_phones_huff_table.c \
-  lang/cmulex/cmu_lts_rules.c \
-  lang/cmulex/make_cmulex \
-  lang/cmulex/make_cmulex_helper.py
- 
-libttsmimic_usenglish_la_LDFLAGS = -no-undefined
-
-usenglishheaderdir = $(langheaderdir)/en_US/
-
-usenglishheader_HEADERS = \
-  lang/usenglish/usenglish.h \
-  lang/usenglish/us_f0.h \
-  lang/usenglish/us_ffeatures.h \
-  lang/usenglish/us_regexes.h \
-  lang/usenglish/us_text.h \
-  lang/cmulex/cmu_lex.h
-
-#regexes:
-#	./make_us_regexes $(BINDIR) >us_regexes.h
-#
-#us_pos_cart.c: 
-#	$(ESTDIR)/../festival/bin/festival \
-#           -b $(MIMICDIR)/tools/make_cart.scm \
-#               $(MIMICDIR)/tools/make_pos.scm 
-
-
-################## END: LANG_ENGLISH ###################################
-
-#################### START:  LANG_GRAPHEME ##################################
-if LANG_GRAPHEME
-  lib_LTLIBRARIES += libttsmimic_grapheme.la
-  libttsmimic_grapheme_la_LIBADD = libttsmimiccore.la
-if ENABLE_LANG_GRAPHEME_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_grapheme.la
-endif
-endif
-
-graphemeheaderdir = $(langheaderdir)/grapheme/
-
-graphemeheader_HEADERS = \
-    lang/cmu_grapheme_lang/cmu_grapheme_lang.h \
-    lang/cmu_grapheme_lex/cmu_grapheme_lex.h
-
-libttsmimic_grapheme_la_LDFLAGS = -no-undefined
-
-libttsmimic_grapheme_la_SOURCES = \
-  lang/cmu_grapheme_lang/cmu_grapheme_phrasing_cart.h \
-  lang/cmu_grapheme_lang/cmu_grapheme_lang.c \
-  lang/cmu_grapheme_lang/cmu_grapheme_plugin.c \
-  lang/cmu_grapheme_lang/cmu_grapheme_phrasing_cart.c \
-  lang/cmu_grapheme_lang/cmu_grapheme_phoneset.c \
-  lang/cmu_grapheme_lex/cmu_grapheme_lex.c \
-  lang/cmu_grapheme_lex/grapheme_unitran_tables.c
-
-EXTRA_DIST += lang/cmu_grapheme_lang/make_grapheme_phoneset
-
-# mapping:
-#	${ESTDIR}/../festival/bin/festival \
-#         -b ${TOP}/tools/make_ug.scm \
-#            ${FESTVOXDIR}/src/grapheme/unicode_sampa_mapping.scm '(doit)'
-
-
-################# END: LANG_GRAPHEME ########################################
-
-#################### START:  LANG_INDIC ##################################
-if LANG_INDIC
-  lib_LTLIBRARIES += libttsmimic_indic.la
-  libttsmimic_indic_la_LIBADD = libttsmimiccore.la libttsmimic_usenglish.la
-if ENABLE_LANG_INDIC_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_indic.la
-endif
-endif
-
-indicheaderdir = $(langheaderdir)/indic/
-
-indicheader_HEADERS = \
-  lang/cmu_indic_lang/cmu_indic_lang.h \
-  lang/cmu_indic_lex/cmu_indic_lex.h
-
-
-libttsmimic_indic_la_LDFLAGS = -no-undefined
-
-libttsmimic_indic_la_SOURCES = \
-  lang/cmu_indic_lang/cmu_indic_lang.c \
-  lang/cmu_indic_lang/cmu_indic_plugin.c \
-  lang/cmu_indic_lang/cmu_indic_phoneset.c \
-  lang/cmu_indic_lang/cmu_indic_phrasing_cart.h \
-  lang/cmu_indic_lang/cmu_indic_phrasing_cart.c \
-  lang/cmu_indic_lex/cmu_indic_lex.c
-
-
-################# END: LANG_INDIC ########################################
-
-############## START: LANG_ES #################################
-if LANG_ES
-  lib_LTLIBRARIES += libttsmimic_es.la
-
-  libttsmimic_es_la_LIBADD = libttsmimiccore.la
-if ENABLE_LANG_ES_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_es.la
-endif
-endif
-
-libttsmimic_es_la_LDFLAGS = -no-undefined
-
-libttsmimic_es_la_SOURCES = \
-  lang/es_lang/es_init.c \
-  lang/es_lang/es_lang.h \
-  lang/es_lang/es_plugin.c \
-  lang/es_lang/es_text_analysis.c \
-  lang/es_lang/es_tokenizer.c
-
-esheaderdir = $(langheaderdir)/es/
-
-esheader_HEADERS = \
-  lang/es_lang/es_lang.h
-
-############## END: LANG_ES  ##################################
-
-if VOICE_CMU_US_KAL
-  lib_LTLIBRARIES += libttsmimic_cmu_us_kal.la
-
-  libttsmimic_cmu_us_kal_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-if ENABLE_CMU_US_KAL_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_kal.la
-endif
-endif
-
-libttsmimic_cmu_us_kal_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_kal_la_SOURCES = \
-  lang/cmu_us_kal/cmu_us_kal.c \
-  lang/cmu_us_kal/cmu_us_kal_diphone.c \
-  lang/cmu_us_kal/cmu_us_kal_lpc.c \
-  lang/cmu_us_kal/cmu_us_kal_res.c \
-  lang/cmu_us_kal/cmu_us_kal_residx.c \
-  lang/cmu_us_kal/cmu_us_kal_ressize.c \
-  lang/cmu_us_kal/voxdefs.h
-
-libttsmimic_cmu_us_kal_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-############
-
-if VOICE_CMU_TIME_AWB
-    lib_LTLIBRARIES += libttsmimic_cmu_time_awb.la
-
-  libttsmimic_cmu_time_awb_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-if ENABLE_CMU_TIME_AWB_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_time_awb.la
-endif
-endif
-
-libttsmimic_cmu_time_awb_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_time_awb_la_SOURCES = \
-  lang/cmu_time_awb/cmu_time_awb.c \
-  lang/cmu_time_awb/cmu_time_awb_cart.c \
-  lang/cmu_time_awb/cmu_time_awb_clunits.c \
-  lang/cmu_time_awb/cmu_time_awb_lex_entry.c \
-  lang/cmu_time_awb/cmu_time_awb_lpc.c \
-  lang/cmu_time_awb/cmu_time_awb_mcep.c \
-  lang/cmu_time_awb/voxdefs.h
-
-libttsmimic_cmu_time_awb_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-##########
-
-if VOICE_CMU_US_KAL16
-    lib_LTLIBRARIES += libttsmimic_cmu_us_kal16.la
-  libttsmimic_cmu_us_kal16_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-
-if ENABLE_CMU_US_KAL16_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_kal16.la
-endif
-endif
-
-libttsmimic_cmu_us_kal16_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_kal16_la_SOURCES = \
-  lang/cmu_us_kal16/cmu_us_kal16.c \
-  lang/cmu_us_kal16/cmu_us_kal16_diphone.c \
-  lang/cmu_us_kal16/cmu_us_kal16_lpc.c \
-  lang/cmu_us_kal16/cmu_us_kal16_res.c \
-  lang/cmu_us_kal16/cmu_us_kal16_residx.c \
-  lang/cmu_us_kal16/voxdefs.h
-
-libttsmimic_cmu_us_kal16_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-
-####################
-
-if VOICE_CMU_US_AWB
-  lib_LTLIBRARIES += libttsmimic_cmu_us_awb.la
-
-  libttsmimic_cmu_us_awb_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-
-if ENABLE_CMU_US_AWB_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_awb.la
-endif
-endif
-
-libttsmimic_cmu_us_awb_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_awb_la_SOURCES = \
-  lang/cmu_us_awb/cmu_us_awb.c \
-  lang/cmu_us_awb/cmu_us_awb_cg.c \
-  lang/cmu_us_awb/cmu_us_awb_cg_durmodel.c \
-  lang/cmu_us_awb/cmu_us_awb_cg_durmodel.h \
-  lang/cmu_us_awb/cmu_us_awb_cg_f0_trees.c \
-  lang/cmu_us_awb/cmu_us_awb_cg_f0_trees.h \
-  lang/cmu_us_awb/cmu_us_awb_cg_phonestate.c \
-  lang/cmu_us_awb/cmu_us_awb_cg_single_mcep_trees.c \
-  lang/cmu_us_awb/cmu_us_awb_cg_single_mcep_trees.h \
-  lang/cmu_us_awb/cmu_us_awb_cg_single_params.c \
-  lang/cmu_us_awb/cmu_us_awb_spamf0_accent.c \
-  lang/cmu_us_awb/cmu_us_awb_spamf0_accent.h \
-  lang/cmu_us_awb/cmu_us_awb_spamf0_accent_params.c \
-  lang/cmu_us_awb/cmu_us_awb_spamf0_phrase.c \
-  lang/cmu_us_awb/cmu_us_awb_spamf0_phrase.h \
-  lang/cmu_us_awb/voxdefs.h
-
-libttsmimic_cmu_us_awb_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-
-###########
-
-if VOICE_CMU_US_RMS
-  lib_LTLIBRARIES += libttsmimic_cmu_us_rms.la
-
-  libttsmimic_cmu_us_rms_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-if ENABLE_CMU_US_RMS_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_rms.la
-endif
-endif
-
-libttsmimic_cmu_us_rms_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_rms_la_SOURCES = \
-  lang/cmu_us_rms/cmu_us_rms.c \
-  lang/cmu_us_rms/cmu_us_rms_cg.c \
-  lang/cmu_us_rms/cmu_us_rms_cg_durmodel.c \
-  lang/cmu_us_rms/cmu_us_rms_cg_durmodel.h \
-  lang/cmu_us_rms/cmu_us_rms_cg_f0_trees.c \
-  lang/cmu_us_rms/cmu_us_rms_cg_f0_trees.h \
-  lang/cmu_us_rms/cmu_us_rms_cg_phonestate.c \
-  lang/cmu_us_rms/cmu_us_rms_cg_single_mcep_trees.c \
-  lang/cmu_us_rms/cmu_us_rms_cg_single_mcep_trees.h \
-  lang/cmu_us_rms/cmu_us_rms_cg_single_params.c \
-  lang/cmu_us_rms/cmu_us_rms_spamf0_accent.c \
-  lang/cmu_us_rms/cmu_us_rms_spamf0_accent.h \
-  lang/cmu_us_rms/cmu_us_rms_spamf0_accent_params.c \
-  lang/cmu_us_rms/cmu_us_rms_spamf0_phrase.c \
-  lang/cmu_us_rms/cmu_us_rms_spamf0_phrase.h \
-  lang/cmu_us_rms/voxdefs.h
-
-libttsmimic_cmu_us_rms_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-###############
-
-if VOICE_CMU_US_SLT
-  lib_LTLIBRARIES += libttsmimic_cmu_us_slt.la
-
-  libttsmimic_cmu_us_slt_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-
-if ENABLE_CMU_US_SLT_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_slt.la
-endif
-endif
-
-libttsmimic_cmu_us_slt_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_slt_la_SOURCES = \
-  lang/cmu_us_slt/cmu_us_slt.c \
-  lang/cmu_us_slt/cmu_us_slt_cg.c \
-  lang/cmu_us_slt/cmu_us_slt_cg_durmodel.c \
-  lang/cmu_us_slt/cmu_us_slt_cg_durmodel.h \
-  lang/cmu_us_slt/cmu_us_slt_cg_f0_trees.c \
-  lang/cmu_us_slt/cmu_us_slt_cg_f0_trees.h \
-  lang/cmu_us_slt/cmu_us_slt_cg_phonestate.c \
-  lang/cmu_us_slt/cmu_us_slt_cg_single_mcep_trees.c \
-  lang/cmu_us_slt/cmu_us_slt_cg_single_mcep_trees.h \
-  lang/cmu_us_slt/cmu_us_slt_cg_single_params.c \
-  lang/cmu_us_slt/cmu_us_slt_spamf0_accent.c \
-  lang/cmu_us_slt/cmu_us_slt_spamf0_accent.h \
-  lang/cmu_us_slt/cmu_us_slt_spamf0_accent_params.c \
-  lang/cmu_us_slt/cmu_us_slt_spamf0_phrase.c \
-  lang/cmu_us_slt/cmu_us_slt_spamf0_phrase.h \
-  lang/cmu_us_slt/voxdefs.h
-
-libttsmimic_cmu_us_slt_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-cmuussltheaderdir = $(langheaderdir)/cmu_us_slt/
-
-cmuussltheader_HEADERS = \
-  lang/cmu_us_slt/cmu_us_slt.h
-
-###############
-
-if VOICE_CMU_US_SLT_HTS
-    lib_LTLIBRARIES += libttsmimic_cmu_us_slt_hts.la
-    voicesinstall_DATA += voices/cmu_us_slt_hts.htsvoice
-  libttsmimic_cmu_us_slt_hts_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-
-if ENABLE_CMU_US_SLT_HTS_BUILTIN
-    libttsmimic_la_LIBADD += libttsmimic_cmu_us_slt_hts.la
-endif
-else
-    EXTRA_DIST += voices/cmu_us_slt_hts.htsvoice
-endif
-
-libttsmimic_cmu_us_slt_hts_la_LDFLAGS = -no-undefined
-libttsmimic_cmu_us_slt_hts_la_SOURCES = \
-  lang/cmu_us_slt_hts/cmu_us_slt_hts.c \
-  lang/cmu_us_slt_hts/voxdefs.h
-
-libttsmimic_cmu_us_slt_hts_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-###########
-
-if VOICE_VID_GB_AP
-  lib_LTLIBRARIES += libttsmimic_vid_gb_ap.la
-  libttsmimic_vid_gb_ap_la_LIBADD = \
-    libttsmimiccore.la \
-    libttsmimic_usenglish.la
-
-if ENABLE_VID_GB_AP_BUILTIN
-  libttsmimic_la_LIBADD += libttsmimic_vid_gb_ap.la
-endif
-
-endif
-
-libttsmimic_vid_gb_ap_la_LDFLAGS = -no-undefined
-libttsmimic_vid_gb_ap_la_SOURCES = \
-  lang/vid_gb_ap/vid_gb_ap.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_01_mcep_trees.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_01_mcep_trees.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_01_params.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_08_durmodel.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_08_durmodel.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_10_durmodel.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_10_durmodel.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_12_mcep_trees.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_12_mcep_trees.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_12_params.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_17_durmodel.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_17_durmodel.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_17_mcep_trees.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_17_mcep_trees.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_17_params.c \
-  lang/vid_gb_ap/vid_gb_ap_cg.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_f0_trees.c \
-  lang/vid_gb_ap/vid_gb_ap_cg_f0_trees.h \
-  lang/vid_gb_ap/vid_gb_ap_cg_phonestate.c \
-  lang/vid_gb_ap/voxdefs.h
-
-libttsmimic_vid_gb_ap_la_CFLAGS = \
-  -I$(top_srcdir)/lang/usenglish \
-  -I$(top_srcdir)/lang/cmulex
-
-
-######### END VOICES ######################################
-
 ###### src/audio ###############
-# TODO: Change to a libtool convenience library to specify custom CFLAGS
 
 src_audio_SOURCES = \
   src/audio/au_alsa.c \
@@ -555,6 +113,9 @@ libttsmimiccore_la_SOURCES += \
 #regexes:
 #	./make_cst_regexes $(BINDIR) >cst_regex_defs.h
 
+EXTRA_DIST += src/regex/compile_mimic_regex.c
+
+
 ###### src/speech #########
 libttsmimiccore_la_SOURCES += \
   src/speech/cst_lpcres.c \
@@ -623,29 +184,18 @@ libttsmimiccore_la_LIBADD += $(AUDIOLIBS) -lm
 
 
 ################# main ########################
-
 bin_PROGRAMS = mimic compile_regexes mimicvox_info
-if LANG_ENGLISH
-  bin_PROGRAMS += t2p mimic_time
-endif
 
 mimic_SOURCES = main/mimic_main.c
-mimic_LDADD = libttsmimic.la libttsmimiccore.la
+mimic_LDADD = libttsmimiccore.la
 
 compile_regexes_SOURCES = main/compile_regexes.c
 compile_regexes_LDADD = libttsmimiccore.la
 
-t2p_SOURCES = main/t2p_main.c
-t2p_LDADD =  libttsmimic.la libttsmimiccore.la libttsmimic_usenglish.la
-
-mimic_time_SOURCES = main/mimic_time_main.c
-mimic_time_LDADD = libttsmimic.la libttsmimiccore.la \
-  libttsmimic_usenglish.la \
-  libttsmimic_cmu_time_awb.la
-
 mimicvox_info_SOURCES = \
   main/mimicvox_info_main.c
-mimicvox_info_LDADD = libttsmimic.la libttsmimiccore.la
+mimicvox_info_LDADD = libttsmimiccore.la
+
 
 ################# END: main ###################
 dist_noinst_SCRIPTS = autogen.sh
@@ -657,39 +207,12 @@ myunittests = unittests/hrg_test \
               unittests/regex_test \
               unittests/string_test \
               unittests/token_test \
-              unittests/voice_select \
               unittests/wave_test
 
 unittests_hrg_test_SOURCES = unittests/hrg_test_main.c
 unittests_hrg_test_LDADD = libttsmimiccore.la
 
-if LANG_ENGLISH
-  myunittests += unittests/lex_test unittests/lts_test unittests/nums_test
-endif
-
-if LANG_ES
-  myunittests += unittests/es_tokenstream_test
-  unittests_es_tokenstream_test_SOURCES = unittests/es_tokenstream_test_main.c
-  unittests_es_tokenstream_test_CFLAGS = \
-    -DTEST_FILE=\"$(top_srcdir)/unittests/es_text.txt\" \
-    -I$(top_srcdir)/lang/es_lang
-  unittests_es_tokenstream_test_LDADD = libttsmimiccore.la \
-                                        libttsmimic_es.la
-endif
-
-
 check_PROGRAMS = $(myunittests)
-
-unittests_lex_test_SOURCES = unittests/lex_test_main.c
-unittests_lex_test_LDADD = libttsmimiccore.la libttsmimic_usenglish.la
-
-unittests_lts_test_SOURCES = unittests/lts_test_main.c
-unittests_lts_test_LDADD = libttsmimiccore.la libttsmimic_usenglish.la
-
-unittests_nums_test_SOURCES = unittests/nums_test_main.c
-unittests_nums_test_CFLAGS = -I$(top_srcdir)/lang/usenglish
-unittests_nums_test_LDADD = libttsmimiccore.la \
-                            libttsmimic_usenglish.la
 
 unittests_regex_test_SOURCES = unittests/regex_test_main.c
 unittests_regex_test_LDADD = libttsmimiccore.la
@@ -703,18 +226,14 @@ unittests_token_test_CFLAGS = -DTEST_FILE=\"$(top_srcdir)/unittests/data.one\" \
                               -DTEST_FILE_UTF8=\"$(top_srcdir)/unittests/data_utf8.txt\"
 unittests_token_test_LDADD = libttsmimiccore.la
 
-unittests_voice_select_SOURCES = unittests/voice_select_test_main.c
-unittests_voice_select_CFLAGS = -DVOICE_LIST_DIR=\"$(top_srcdir)/voices\" \
-                                -DA_VOICE=\"$(top_srcdir)/voices/cmu_us_rms.flitevox\" 
-unittests_voice_select_LDADD = libttsmimic.la libttsmimiccore.la
-
 unittests_wave_test_SOURCES = unittests/wave_test_main.c
-unittests_wave_test_LDADD = libttsmimic.la libttsmimiccore.la
-unittests_wave_test_CFLAGS = -DVOICE_LIST_DIR=\"$(top_srcdir)/voices\" \
-                             -DA_VOICE=\"$(top_srcdir)/voices/cmu_us_rms.flitevox\" 
+unittests_wave_test_LDADD = libttsmimiccore.la
+unittests_wave_test_CFLAGS = -DA_WAV1=\"$(top_srcdir)/unittests/hello_world.wav\" \
+                             -DA_WAV2=\"$(top_srcdir)/unittests/hi_again.wav\" 
 
 
-EXTRA_DIST += unittests/data.one unittests/data_utf8.txt
+EXTRA_DIST += unittests/data.one unittests/data_utf8.txt \
+    unittests/hello_world.wav unittests/hi_again.wav
 
 ########## END Unit tests #########################
 
@@ -722,45 +241,18 @@ EXTRA_DIST += unittests/data.one unittests/data_utf8.txt
 check_PROGRAMS += \
   testsuite/asciiS2U \
   testsuite/asciiU2S \
-  testsuite/bin2ascii
-
-if VOICE_CMU_US_KAL
-  check_PROGRAMS += testsuite/by_word
-endif
-
-check_PROGRAMS += \
+  testsuite/bin2ascii \
   testsuite/combine_waves \
-  testsuite/compare_wave
-
-if VOICE_CMU_US_KAL
-  check_PROGRAMS += testsuite/kal_test
-endif
-
-if LANG_ENGLISH
-check_PROGRAMS += \
-  testsuite/lex_lookup
-endif
-
-check_PROGRAMS += \
+  testsuite/compare_wave \
   testsuite/lpc_resynth \
   testsuite/lpc_test2 \
-  testsuite/lpc_test
-
-if VOICE_CMU_US_SLT
-  check_PROGRAMS += testsuite/multi_thread
-endif
-
-check_PROGRAMS += \
+  testsuite/lpc_test \
   testsuite/play_client \
   testsuite/play_server \
   testsuite/play_sync \
   testsuite/play_wave \
-  testsuite/rfc \
-  testsuite/time_voice_load
+  testsuite/rfc
 
-if LANG_ENGLISH
-  check_PROGRAMS += testsuite/utt_test
-endif
 testsuite_asciiS2U_SOURCES = testsuite/asciiS2U_main.c
 testsuite_asciiS2U_LDADD = libttsmimiccore.la
 
@@ -770,23 +262,12 @@ testsuite_asciiU2S_LDADD = libttsmimiccore.la
 testsuite_bin2ascii_SOURCES = testsuite/bin2ascii_main.c
 testsuite_bin2ascii_LDADD = libttsmimiccore.la
 
-testsuite_by_word_SOURCES = testsuite/by_word_main.c
-testsuite_by_word_LDADD = libttsmimic.la libttsmimiccore.la \
-                          libttsmimic_cmu_us_kal.la
 
 testsuite_combine_waves_SOURCES = testsuite/combine_waves_main.c
 testsuite_combine_waves_LDADD = libttsmimiccore.la
 
 testsuite_compare_wave_SOURCES = testsuite/compare_wave_main.c
 testsuite_compare_wave_LDADD = libttsmimiccore.la
-
-testsuite_kal_test_SOURCES = testsuite/kal_test_main.c
-testsuite_kal_test_LDADD = libttsmimic.la  libttsmimiccore.la \
-                           libttsmimic_cmu_us_kal.la
-
-testsuite_lex_lookup_SOURCES = testsuite/lex_lookup_main.c
-testsuite_lex_lookup_LDADD = libttsmimiccore.la \
-                             libttsmimic_usenglish.la
 
 testsuite_lpc_resynth_SOURCES = testsuite/lpc_resynth_main.c
 testsuite_lpc_resynth_LDADD = libttsmimiccore.la
@@ -796,11 +277,6 @@ testsuite_lpc_test2_LDADD = libttsmimiccore.la
 
 testsuite_lpc_test_SOURCES = testsuite/lpc_test_main.c
 testsuite_lpc_test_LDADD = libttsmimiccore.la
-
-testsuite_multi_thread_SOURCES = testsuite/multi_thread_main.c
-testsuite_multi_thread_CFLAGS = $(OPENMP_CFLAGS)
-testsuite_multi_thread_LDADD = libttsmimic.la libttsmimiccore.la \
-                               libttsmimic_cmu_us_slt.la
 
 testsuite_play_client_SOURCES = testsuite/play_client_main.c
 testsuite_play_client_LDADD = libttsmimiccore.la
@@ -817,14 +293,7 @@ testsuite_play_wave_LDADD = libttsmimiccore.la
 testsuite_rfc_SOURCES = testsuite/rfc_main.c
 testsuite_rfc_LDADD = libttsmimiccore.la
 
-testsuite_utt_test_SOURCES = testsuite/utt_test_main.c
-testsuite_utt_test_LDADD = libttsmimiccore.la libttsmimic_usenglish.la
-
-testsuite_time_voice_load_SOURCES = testsuite/time_voice_load.c
-testsuite_time_voice_load_LDADD = libttsmimic.la libttsmimiccore.la -lm
-
 TESTS += $(myunittests)
-# "testsuite/multi_thread_run.sh"
 
 headers_HEADERS += \
   include/cst_alloc.h \
@@ -873,6 +342,7 @@ headers_HEADERS += \
 
 # Documentation
 dist_man1_MANS = man/man1/mimic.1
+EXTRA_DIST += doc/alice doc/intro.txt doc/Makefile doc/mimic.texi doc/stuff.ed
 
 clean-local:
 	find . -name '*.gcno' -exec rm {} \;
