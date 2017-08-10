@@ -9,7 +9,7 @@ conf_data = configuration_data()
 
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), 'ttsmimic')
 conf_data.set('PKGDATADIR', '"' + pkgdatadir + '"')
-
+pkgconfig_requires = []
 mmap_type_none = 0
 mmap_type_posix = 1
 mmap_type_win32 = 2
@@ -60,6 +60,7 @@ endif
 # PCRE-2
 pcre2_dep = dependency('libpcre2-8')
 mimic_core_deps += pcre2_dep
+pkgconfig_requires += ['libpcre2-8']
 
 # Audio driver:
 
@@ -92,6 +93,7 @@ foreach audio : selected_audio
         final_audio = audio
         conf_data.set('CST_AUDIO_ALSA', '')
         mimic_core_deps += alsa_dep
+        pkgconfig_requires += ['alsa']
       endif
     elif audio == 'portaudio'
       portaudio_dep = dependency('portaudio-2.0', version: '>= 19', required: false)
@@ -100,6 +102,7 @@ foreach audio : selected_audio
         final_audio = audio
         conf_data.set('CST_AUDIO_PORTAUDIO', '')
         mimic_core_deps += portaudio_dep
+        pkgconfig_requires += ['portaudio-2.0']
       endif
     elif audio == 'none'
       have_audio = true
@@ -111,6 +114,7 @@ foreach audio : selected_audio
         final_audio = audio
         conf_data.set('CST_AUDIO_PULSEAUDIO', '')
         mimic_core_deps += pulseaudio_dep
+        pkgconfig_requires += ['libpulse']
       endif
     elif audio == 'sun'
       if c_compiler.has_header('sys/audioio.h')
@@ -153,9 +157,12 @@ if host_system == 'windows' or dl_dep.found()
   endif
   conf_data.set_quoted('MIMIC_PLUGIN_PREFIX', library_prefix)
   conf_data.set_quoted('MIMIC_PLUGIN_EXT', library_extension)
-  plugin_dir = join_paths(get_option('prefix'), get_option('libdir'), 'ttsmimic', 'plugins')
-  conf_data.set_quoted('MIMIC_PLUGIN_DIR', plugin_dir)
+  # Do not rename mimic_plugin_dir, as it is used by dependencies
+  mimic_plugin_dir = join_paths(get_option('prefix'), get_option('libdir'), 'ttsmimic', 'plugins')
+  conf_data.set_quoted('MIMIC_PLUGIN_DIR', mimic_plugin_dir)
   mimic_core_deps += dl_dep
+else
+  mimic_plugin_dir = ''
 endif
 
 conf_data.set('PACKAGE_NAME', '"' + meson.project_name() + '"')
@@ -326,6 +333,7 @@ ttsmimiccore = library('ttsmimiccore', sources,
                       dependencies: mimic_core_deps,
                       install: true)
 
+# Do not rename the ttsmimiccore_dep variable, as it is used by dependencies
 ttsmimiccore_dep = declare_dependency(link_with : ttsmimiccore, 
                                       include_directories : includes)
 
@@ -388,9 +396,10 @@ pkg = import('pkgconfig')
 pkg.generate(libraries : ttsmimiccore,
              name : 'ttsmimiccore',
              description: 'A library for text to speech synthesis.',
+             requires: pkgconfig_requires,
              subdirs: 'ttsmimic',
              version: meson.project_version(),
-             variables: ['mimic_plugin_dir=@0@'.format(plugin_dir)])
+             variables: ['mimic_plugin_dir=@0@'.format(mimic_plugin_dir)])
 
 
 ############# Binaries ####################

@@ -91,6 +91,7 @@ dnl: pkg-config mimic.pc file:
 PKGCONFIG_MIMIC_CORE_CFLAGS="-I${includedir}/ttsmimic "'-DMIMIC_PLUGIN_DIR=${libdir}/ttsmimic/plugins'
 PKGCONFIG_MIMIC_CORE_LIBS="-L${libdir}"
 PKGCONFIG_MIMIC_CORE_DEPS=
+PKGCONFIG_MIMIC_CORE_VARS="mimic_plugin_dir="'${libdir}/ttsmimic/plugins'
 
 dnl Check libpcre2-8
 PKG_CHECK_MODULES([PCRE2], [libpcre2-8])
@@ -230,8 +231,8 @@ AC_SUBST(AUDIOLIBS)
 AC_SUBST(PKGCONFIG_MIMIC_CORE_CFLAGS)
 AC_SUBST(PKGCONFIG_MIMIC_CORE_LIBS)
 AC_SUBST(PKGCONFIG_MIMIC_CORE_DEPS)
+AC_SUBST(PKGCONFIG_MIMIC_CORE_VARS)
 
-dnl estoy aqui
 AC_SUBST(EXEEXT)
 
 LIBPREFIX="lib"
