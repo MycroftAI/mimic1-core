@@ -341,6 +341,7 @@ case "${WHAT_TO_RUN}" in
   meson)
     set_build_and_install_dir
     compile_dependencies
+    export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${MIMIC_INSTALL_DIR}/lib"
     export PKG_CONFIG_PATH="${MIMIC_INSTALL_DIR}/lib/pkgconfig"
     meson "${WORKDIR}" "${MIMIC_TOP_SRCDIR}" --prefix="${MIMIC_INSTALL_DIR}" || exit 1
     ninja -C "${WORKDIR}" test || exit 1
