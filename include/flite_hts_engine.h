@@ -46,7 +46,7 @@
 #ifndef FLITE_HTS_ENGINE_H
 #define FLITE_HTS_ENGINE_H
 
-#include "config.h"
+#include "mimic_core_config.h"
 
 #if HAVE_HTSENGINE == 0
 

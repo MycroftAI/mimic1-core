@@ -43,7 +43,7 @@
 /* ----------------------------------------------------------------- */
 /* mimic adaptations by Sergio Oller, 2017 */
 
-#include "config.h"
+#include "mimic_core_config.h"
 #include "cst_synth.h"
 #include "cst_utt_utils.h"
 #include <math.h>

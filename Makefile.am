@@ -302,7 +302,7 @@ headers_HEADERS += \
   include/cst_cart.h \
   include/cst_cg.h \
   include/cst_clunits.h \
-  include/config.h \
+  include/mimic_core_config.h \
   include/cst_diphone.h \
   include/cst_endian.h \
   include/cst_error.h \

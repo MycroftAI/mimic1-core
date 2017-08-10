@@ -34,7 +34,7 @@
  */
  /* A plugin system for mimic */
 
-#include "config.h"
+#include "mimic_core_config.h"
 #ifdef MIMIC_ENABLE_PLUGINS
 
 #include "cst_alloc.h"

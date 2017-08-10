@@ -18,7 +18,7 @@ LT_INIT([dlopen win32-dll disable-static])
 AM_SILENT_RULES([yes])
 AC_PROG_INSTALL
 AC_CONFIG_SRCDIR([include/mimic.h])
-AC_CONFIG_HEADERS([include/config.h])
+AC_CONFIG_HEADERS([include/mimic_core_config.h])
 LT_PREREQ([2.2.6])
 AC_C_BIGENDIAN
 
@@ -88,7 +88,7 @@ AS_IF([test "x$with_hts" != "xno"],
 AM_CONDITIONAL([HTSEngineBundled], [test "x$with_hts_bundled" != "xno"])
 
 dnl: pkg-config mimic.pc file:
-PKGCONFIG_MIMIC_CORE_CFLAGS="-I${includedir}/ttsmimic -DMIMIC_PLUGIN_DIR=@libdir@/ttsmimic/plugins"
+PKGCONFIG_MIMIC_CORE_CFLAGS="-I${includedir}/ttsmimic "'-DMIMIC_PLUGIN_DIR=${libdir}/ttsmimic/plugins'
 PKGCONFIG_MIMIC_CORE_LIBS="-L${libdir}"
 PKGCONFIG_MIMIC_CORE_DEPS=
 

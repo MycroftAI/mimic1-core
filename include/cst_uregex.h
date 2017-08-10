@@ -31,7 +31,7 @@
 #ifndef CST_UREGEX_H__
 #define CST_UREGEX_H__
 
-#include "config.h"
+#include "mimic_core_config.h"
 #include <stdint.h>
 #include <cst_string.h>
 

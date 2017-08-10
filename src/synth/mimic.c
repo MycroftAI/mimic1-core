@@ -37,7 +37,7 @@
 /*  Basic user level functions                                           */
 /*                                                                       */
 /*************************************************************************/
-#include "config.h"
+#include "mimic_core_config.h"
 #include <errno.h>
 #include "cst_tokenstream.h"
 #include "mimic.h"

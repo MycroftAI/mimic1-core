@@ -43,13 +43,13 @@ aclocal.m4
 autom4te.cache
 Makefile.in
 m4/*
-include/config.h.in
+include/mimic-core-config.h.in
 
 # Building Process Files/Directories
 *.deps
 *.dirstamp
 Makefile
-include/config.h
+include/mimic-core-config.h
 include/stamp-h1
 
 # Test suite executables

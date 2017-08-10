@@ -36,7 +36,7 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include "config.h"
+#include "mimic_core_config.h"
 
 #if (MMAP_TYPE == MMAP_TYPE_POSIX)
 

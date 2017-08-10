@@ -36,7 +36,7 @@
 
 #ifndef include_cst_plugins_h
 #define include_cst_plugins_h
-#include "config.h"
+#include "mimic_core_config.h"
 #ifdef MIMIC_ENABLE_PLUGINS
 typedef struct mimic_plugin_s
 {

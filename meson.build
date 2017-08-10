@@ -162,14 +162,16 @@ conf_data.set('PACKAGE_NAME', '"' + meson.project_name() + '"')
 conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
 conf_data.set('PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
 
-mimic_config_h = configure_file(output : 'config.h',
+mimic_config_h = configure_file(output : 'mimic_core_config.h',
                                 configuration : conf_data, install: true,
                                 install_dir : join_paths(get_option('includedir'), 'ttsmimic'))
 
-mimic_include_top_build_dir = include_directories(meson.current_build_dir())
+mimic_include_top_build_dir = meson.current_build_dir()
+message('Top build dir: @0@'.format(meson.current_build_dir()))
 
 # libttsmimic:
-includes = [mimic_include_top_build_dir]
+#includes = [mimic_include_top_build_dir]
+includes = []
 sources = []
 
 ###### src/audio ###############
@@ -398,6 +400,10 @@ mimicbin = executable('mimic', 'main/mimic_main.c',
                       install: true)
 
 mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
+                           dependencies: ttsmimiccore_dep,
+                           install: true)
+
+compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
                            dependencies: ttsmimiccore_dep,
                            install: true)
 

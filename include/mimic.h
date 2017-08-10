@@ -44,7 +44,7 @@
 extern "C" {
 #endif                          /* __cplusplus */
 
-#include "config.h"
+#include "mimic_core_config.h"
 #include "cst_string.h"
 #include "cst_regex.h"
 #include "cst_val.h"

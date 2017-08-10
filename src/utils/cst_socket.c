@@ -37,7 +37,7 @@
 /*  Some generic socket client/server code                               */
 /*                                                                       */
 /*************************************************************************/
-#include "config.h"
+#include "mimic_core_config.h"
 
 #if HAVE_SYS_SOCKET_H == 0
 
