@@ -334,7 +334,8 @@ ttsmimiccore = library('ttsmimiccore', sources,
                       install: true)
 
 # Do not rename the ttsmimiccore_dep variable, as it is used by dependencies
-ttsmimiccore_dep = declare_dependency(link_with : ttsmimiccore, 
+ttsmimiccore_dep = declare_dependency(link_with : ttsmimiccore,
+                                      dependencies: mimic_core_deps,
                                       include_directories : includes)
 
 ############ Headers #################
