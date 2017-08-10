@@ -7,7 +7,7 @@ SUBDIRS = .
 # instead of pkgincludedir we will use $(includedir)/ttsmimic
 headersdir = $(includedir)/ttsmimic/
 
-EXTRA_DIST = ACKNOWLEDGEMENTS COPYING dependencies.sh thirdparty/pcre2.patch run_testsuite.sh
+EXTRA_DIST = ACKNOWLEDGEMENTS COPYING dependencies.sh thirdparty/pcre2.patch run_testsuite.sh meson.build meson_options.txt
 noinst_HEADERS = 
 headers_HEADERS =
 lib_LTLIBRARIES =
@@ -22,7 +22,7 @@ libttsmimiccore_la_LIBADD = $(PCRE2_LIBS)
 TESTS = 
 
 pkgconfiginstalldir = $(libdir)/pkgconfig
-pkgconfiginstall_DATA = libttsmimiccore.pc
+pkgconfiginstall_DATA = ttsmimiccore.pc
 
 voicesinstalldir = $(pkgdatadir)/voices
 voicesinstall_DATA = 

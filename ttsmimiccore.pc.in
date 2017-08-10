@@ -3,7 +3,7 @@ exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
 
-Name: libttsmimiccore
+Name: ttsmimiccore
 Description: Core of the mycroft library
 URL: http://mimic.mycroft.ai/
 Version: @VERSION@

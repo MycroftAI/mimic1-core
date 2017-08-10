@@ -6,6 +6,7 @@ if [ "$#" -eq 0 ]; then
   echo "  - ./run_testsuite.sh osx (OSX install dependencies, build and test)"
   echo "  - ./run_testsuite.sh ios (OSX install dependencies, build universal lib)"
   echo "  - ./run_testsuite.sh coverage (Build with code coverage)"
+  echo "  - ./run_testsuite.sh meson (Build with meson)"
   echo "  - ./run_testsuite.sh shared (Build with shared libraries)"
   echo "  - ./run_testsuite.sh gcc6 (Build using gcc6)"
   echo "  - ./run_testsuite.sh arm-linux-gnueabihf-gcc (crosscompiling)"
@@ -336,6 +337,14 @@ case "${WHAT_TO_RUN}" in
     compile_dependencies
     run_mimic_autogen
     compile_mimic --enable-shared CFLAGS="$CFLAGS --std=c99"
+    ;;
+  meson)
+    set_build_and_install_dir
+    compile_dependencies
+    export PKG_CONFIG_PATH="${MIMIC_INSTALL_DIR}/lib/pkgconfig"
+    meson "${WORKDIR}" "${MIMIC_TOP_SRCDIR}" --prefix="${MIMIC_INSTALL_DIR}" || exit 1
+    ninja -C "${WORKDIR}" test || exit 1
+    ninja -C "${WORKDIR}" install || exit 1
     ;;
   gcc6)
       export CC="/usr/bin/gcc-6"
