@@ -158,8 +158,18 @@ if host_system == 'windows' or dl_dep.found()
   mimic_core_deps += dl_dep
 endif
 
+conf_data.set('PACKAGE_NAME', '"' + meson.project_name() + '"')
+conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
+conf_data.set('PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
+
+mimic_config_h = configure_file(output : 'config.h',
+                                configuration : conf_data, install: true,
+                                install_dir : join_paths(get_option('includedir'), 'ttsmimic'))
+
+mimic_include_top_build_dir = include_directories(meson.current_build_dir())
+
 # libttsmimic:
-includes = []
+includes = [mimic_include_top_build_dir]
 sources = []
 
 ###### src/audio ###############
@@ -390,14 +400,6 @@ mimicbin = executable('mimic', 'main/mimic_main.c',
 mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
                            dependencies: ttsmimiccore_dep,
                            install: true)
-
-conf_data.set('PACKAGE_NAME', '"' + meson.project_name() + '"')
-conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
-conf_data.set('PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
-
-configure_file(output : 'config.h',
-               configuration : conf_data, install: true, install_dir : join_paths(get_option('includedir'), 'ttsmimic'))
-
 
 ########## Unit tests #########################
 unit_tests =  [
