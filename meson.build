@@ -58,7 +58,7 @@ endif
 
 
 # PCRE-2
-pcre2_dep = dependency('libpcre2-8')
+pcre2_dep = dependency('libpcre2-8', fallback: ['pcre2', 'libpcre2_8'])
 mimic_core_deps += pcre2_dep
 pkgconfig_requires += ['libpcre2-8']
 

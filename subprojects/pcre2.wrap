@@ -1,0 +1,11 @@
+[wrap-file]
+directory = pcre-10.23
+
+source_url = https://ftp.pcre.org/pub/pcre/pcre2-10.23.zip
+source_filename = pcre2-10.23.zip
+source_hash = 6301a525a8a7e63a5fac0c2fbfa0374d3eb133e511d886771e097e427707094a
+
+
+patch_url = https://www.dropbox.com/s/r3vzq0x60rhdk9c/pcre2-10.23-wrap.zip?dl=0
+patch_filename = pcre2-10.23-wrap.zip
+patch_hash = 77ba4638329455d4f4acb07ee6b26c652d7f15c160ef6b2f9eec48a74965629f
