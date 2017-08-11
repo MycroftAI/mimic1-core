@@ -146,7 +146,9 @@ run_mimic_autogen()
 
 set_build_and_install_dir()
 {
-    MIMIC_INSTALL_DIR=`pwd`"/install/${WHAT_TO_RUN}"
+    if [ -z "${MIMIC_INSTALL_DIR}" ]; then
+      MIMIC_INSTALL_DIR=`pwd`"/install/${WHAT_TO_RUN}"
+    fi
     export WORKDIR=`pwd`"/builds/${WHAT_TO_RUN}"
     mkdir -p "${MIMIC_INSTALL_DIR}"
     mkdir -p "${WORKDIR}"

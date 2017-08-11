@@ -4,12 +4,12 @@ mimic_core_deps = []
 c_compiler = meson.get_compiler('c')
 host_system = host_machine.system()
 
-
 conf_data = configuration_data()
 
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), 'ttsmimic')
 conf_data.set('PKGDATADIR', '"' + pkgdatadir + '"')
 pkgconfig_requires = []
+pkgconfig_lib_private = []
 mmap_type_none = 0
 mmap_type_posix = 1
 mmap_type_win32 = 2
@@ -161,6 +161,7 @@ if host_system == 'windows' or dl_dep.found()
   mimic_plugin_dir = join_paths(get_option('prefix'), get_option('libdir'), 'ttsmimic', 'plugins')
   conf_data.set_quoted('MIMIC_PLUGIN_DIR', mimic_plugin_dir)
   mimic_core_deps += dl_dep
+  pkgconfig_lib_private += ['-ldl']
 else
   mimic_plugin_dir = ''
 endif
@@ -175,6 +176,15 @@ mimic_config_h = configure_file(output : 'mimic_core_config.h',
 
 mimic_include_top_build_dir = meson.current_build_dir()
 message('Top build dir: @0@'.format(meson.current_build_dir()))
+
+# Math library
+m_dep = c_compiler.find_library('m', required : false)
+if m_dep.found()
+  mimic_core_deps += m_dep
+  pkgconfig_lib_private += ['-lm']
+endif
+
+
 
 # libttsmimic:
 #includes = [mimic_include_top_build_dir]
@@ -322,10 +332,6 @@ sources += [
   'src/wavesynth/cst_sts.c', 
   'src/wavesynth/cst_units.c']
 
-# Math library
-m_dep = c_compiler.find_library('m', required : false)
-mimic_core_deps += m_dep
-
 includes += include_directories('include')
 
 ttsmimiccore = library('ttsmimiccore', sources,
@@ -398,6 +404,7 @@ pkg.generate(libraries : ttsmimiccore,
              name : 'ttsmimic_core',
              description: 'A library for text to speech synthesis.',
              requires: pkgconfig_requires,
+             libraries_private: pkgconfig_lib_private,
              subdirs: 'ttsmimic',
              version: meson.project_version(),
              variables: ['mimic_plugin_dir=@0@'.format(mimic_plugin_dir)])
