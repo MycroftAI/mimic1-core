@@ -395,7 +395,7 @@ install_man('man/man1/mimic.1')
 pkg = import('pkgconfig')
 
 pkg.generate(libraries : ttsmimiccore,
-             name : 'ttsmimiccore',
+             name : 'ttsmimic_core',
              description: 'A library for text to speech synthesis.',
              requires: pkgconfig_requires,
              subdirs: 'ttsmimic',

@@ -240,7 +240,7 @@ LIBEXTENSION="so"
 AC_DEFINE([MIMIC_PLUGIN_PREFIX], ["libttsmimic_"], [Prefix used in plugins])
 AC_DEFINE([MIMIC_PLUGIN_EXT], ["so"], [Extension used in plugins])
 
-AC_CONFIG_FILES([Makefile ttsmimiccore.pc])
+AC_CONFIG_FILES([Makefile ttsmimic_core.pc])
 AC_OUTPUT
 
 AS_IF( [ test "${AUDIODRIVER}" = "none" && test "$with_audio" != "none" ],

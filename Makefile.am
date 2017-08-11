@@ -22,7 +22,7 @@ libttsmimiccore_la_LIBADD = $(PCRE2_LIBS)
 TESTS = 
 
 pkgconfiginstalldir = $(libdir)/pkgconfig
-pkgconfiginstall_DATA = ttsmimiccore.pc
+pkgconfiginstall_DATA = ttsmimic_core.pc
 
 voicesinstalldir = $(pkgdatadir)/voices
 voicesinstall_DATA = 
