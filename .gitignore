@@ -88,3 +88,4 @@ _festsuite
 lang/cmulex/festival
 lang/cmulex/festlex_CMU.tar.gz
 
+subprojects/pcre2-10.23/
