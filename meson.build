@@ -56,9 +56,20 @@ if use_hts
 endif
 
 
+# libttsmimic:
+#includes = [mimic_include_top_build_dir]
+includes = []
+sources = []
+
 
 # PCRE-2
-pcre2_dep = dependency('libpcre2-8', fallback: ['pcre2', 'libpcre2_8'])
+pcre2_dep = dependency('libpcre2-8', required: false)
+if not pcre2_dep.found()
+  pcre2_sub = subproject('pcre2')
+  pcre2_dep = pcre2_sub.get_variable('libpcre2_8')
+  includes += [include_directories('subprojects/pcre2-10.23/src')]
+endif
+
 mimic_core_deps += pcre2_dep
 pkgconfig_requires += ['libpcre2-8']
 
@@ -184,12 +195,6 @@ if m_dep.found()
   pkgconfig_lib_private += ['-lm']
 endif
 
-
-
-# libttsmimic:
-#includes = [mimic_include_top_build_dir]
-includes = []
-sources = []
 
 ###### src/audio ###############
 sources += [
