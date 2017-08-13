@@ -66,7 +66,8 @@ else
     # We compile it:
     hts_engine_sub = subproject('HTSEngine')
     hts_dep = hts_engine_sub.get_variable('libHTSEngine')
-    includes += [include_directories('subprojects/HTSEngine/include')]
+    hts_includes = hts_engine_sub.get_variable('includes')
+    includes += [hts_includes]
     pkgconfig_requires += ['HTSEngine']
   endif
 endif
