@@ -86,7 +86,7 @@ static void finish_header(HWAVEOUT drvr, WAVEHDR * hdr)
 }
 
 void CALLBACK sndbuf_done(HWAVEOUT drvr, UINT msg,
-                          DWORD udata, DWORD param1, DWORD param2)
+                          DWORD_PTR udata, DWORD_PTR param1, DWORD_PTR param2)
 {
     WAVEHDR *hdr = (WAVEHDR *) param1;
     cst_audiodev *ad = (cst_audiodev *) udata;
@@ -141,7 +141,7 @@ cst_audiodev *audio_open_wince(int sps, int channels, int fmt)
     wfx.nBlockAlign = wfx.nChannels * wfx.wBitsPerSample / 8;
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
     err = waveOutOpen(&wo, WAVE_MAPPER, &wfx,
-                      (DWORD) sndbuf_done, (DWORD) ad, CALLBACK_FUNCTION);
+                      (DWORD_PTR) sndbuf_done, (DWORD_PTR) ad, CALLBACK_FUNCTION);
     if (err != MMSYSERR_NOERROR)
     {
         cst_errmsg("Failed to open output device: %x\n", err);
