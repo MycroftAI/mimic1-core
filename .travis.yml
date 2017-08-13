@@ -6,76 +6,83 @@ matrix:
     - env: TASK="osx"
       os: osx
       compiler: clang
-# workaround travis error:
-# /Users/travis/build.sh: line 159: shell_session_update: command not found
-# https://github.com/bizz84/SwiftyStoreKit/commit/68a67eef94670964e62ea473860b82780c386c77
       before_install: rvm get stable
-    - env: TASK="ios"
-      os: osx
-      compiler: clang
-# workaround travis error:
-# /Users/travis/build.sh: line 159: shell_session_update: command not found
-# https://github.com/bizz84/SwiftyStoreKit/commit/68a67eef94670964e62ea473860b82780c386c77
-      before_install: rvm get stable 
-    - env: TASK="coverage" # code coverage
-      os: linux
-      dist: trusty
-      compiler: gcc
-      addons: {apt: {packages: [libasound2-dev]}}
-      after_success: bash <(curl -s https://codecov.io/bash)
-    - env: TASK="shared"   # shared libraries
-      os: linux
-      dist: trusty
-      compiler: gcc
-      addons: {apt: {packages: [libasound2-dev]}}
-    - env: TASK="meson"   # shared libraries
-      before_install:
-        - export PATH="`pwd`/build:${PATH}"
-        - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build; fi
+      install:
+        - brew update
+        - brew install python3 ninja pkg-config pcre2 portaudio; echo "done"
         - pip3 install meson
+    - env: TASK="linux"
       os: linux
-      dist: trusty
-      compiler: gcc
-      addons: {apt: {packages: [libasound2-dev, python3, python3-pip]}}
-    - env: TASK="gcc6"   # gcc-6
+      dist: "trusty"
+      install:
+        - export PATH="`pwd`/build:${PATH}"
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build
+        - pip3 install meson
+      addons: {apt: {packages: [libasound2-dev, python3-pip, pkg-config]}}
+    - env: TASK="coverage"
       os: linux
-      dist: trusty
-      compiler: gcc-6
-      addons: {apt: {packages: [libasound2-dev, gcc-6],  sources: [ubuntu-toolchain-r-test]}}
-    - env: TASK="arm-linux-gnueabihf-gcc" # arm build
+      dist: "trusty"
+      install:
+        - export PATH="`pwd`/build:${PATH}"
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build
+        - pip3 install meson
+      script:
+        - meson build --prefix="$PWD/install" -D b_coverage=true
+        - ninja -C build test
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
+      addons: {apt: {packages: [libasound2-dev, python3-pip, pkg-config]}}
+    - env: TASK="windows"
       os: linux
-      dist: trusty
-      compiler: arm-linux-gnueabihf-gcc
-      addons: {apt: {packages: [pkg-config-arm-linux-gnueabihf, libc6-dev-armhf-cross, gcc-arm-linux-gnueabihf, binutils-arm-linux-gnueabihf]}}
-    - env: TASK="winbuild" # windows build
+      dist: "trusty"
+      install:
+        - export PATH="`pwd`/build:${PATH}"
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build
+        - pip3 install meson
+      script:
+        - meson build --prefix="$PWD/install" --cross-file="cross/ubuntu-mingw64.txt"
+        - ninja -C build install
+      addons: {apt: {packages: [python3-pip, pkg-config, wine, binutils-mingw-w64-x86-64, mingw-w64-x86-64-dev, gcc-mingw-w64-x86-64]}}
+    - env: TASK="armhf"
       os: linux
-      dist: trusty
-      compiler: i686-w64-mingw32-gcc
-      addons: {apt: {packages: [wine, xvfb, binutils-mingw-w64-i686, mingw-w64-i686-dev, gcc-mingw-w64-i686]}}
-    - env: TASK="winbuild_shared" # windows build shared libraries
-      os: linux
-      dist: trusty
-      compiler: i686-w64-mingw32-gcc
-      addons: {apt: {packages: [wine, xvfb, binutils-mingw-w64-i686, mingw-w64-i686-dev, gcc-mingw-w64-i686]}}
+      dist: "trusty"
+      install:
+        - export PATH="`pwd`/build:${PATH}"
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.7.2/ninja-linux.zip && unzip -q ninja-linux.zip -d build
+        - pip3 install meson
+      script:
+        - meson build --prefix="$PWD/install" --cross-file="cross/ubuntu-armhf.txt"
+        - ninja -C build install
+      addons: {apt: {packages: [python3-pip, pkg-config-arm-linux-gnueabihf, libc6-dev-armhf-cross, gcc-arm-linux-gnueabihf, binutils-arm-linux-gnueabihf]}}
 
+# We don't want to pull submodules recursively
+git:
+  submodules: false
+
+before_install:
+  - git submodule update --init
 
 script:
-  - ./run_testsuite.sh "$TASK"
+  - meson build --prefix="$PWD/install"
+  - ninja -C build test install
+
 
 
 env:
   global:
    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
    #   via the "travis encrypt" command using the project repo's public key
-   - secure: "VQXmVb9lTL4Yo58doWyCkdPTaDoe7sHPnOMCcJMPuxOpK1d/JWkm9Pp2UV8L/32JkCOO32azPJ1R1nr7uz6GFs0CwNAW+FO24mRex/h3CaH33eu7fQkq4MwfBqa19qqPoUX7KB8iofT6KyRxNrC8Z+zYPR9gogP2VrLSldi0Wva3+On/9tnj+e0/Cy2lTfjyXGvdFoDCM+WtbVz38IZrrAl7TG9azCorM0AaHr1U57DNVKQNlWdTJLiN2tzc5971nA7/Ws+ZoNK2ZWV6fIghgLju/h25JIqKpXB/Wi5QyUWY0pZ5oAEfqIgJchZ3e5qLS4bARsJwXTL8BFfwStA05qBTKI5M0lj93u1/d4tuVJzSP5LTJJelFYPsLVtyOKglFHr/Pb4PhieHJXjr/jig8P48nP+jgXcQjpP4uLZ3D1Z01///QCWCiHXloSurQkA0fhQSyeCHGNiTPEjAYfcFAjlH5/C1tsRLIerxm8hdGDhF0x7lg9j069B0Yet5GINiBeBZdTph1r6YWYQUqAwb8gAYt20KE/i/f5TSIFOd9jDOrPHLgSZX0N+C7x6PqVTxBGMksNJtf+PNOrBC5+VbYxdw0ldX1AveBD4oW9bcJ9wo3rAsFGZ8q6Vnl0r3U48eKWtMUf4//aq4Ab1h/LP8t+c+XyEXfMNh4WpJ4lySn4s="
+   - secure: "RhaRC6Zqf+OTAKK/b3fYOb02z2tIMc7SmpAZfLy2hK0rtx8DRG9noHXuzPn6DaZvGqmVhvmtW6q7EYDrXBqvTIjalq+D94ROA5HDRIk/GH0HzIDuSieYVda8bTE9nBHm1wMBX/hjoDVLAauVnNo1r7YHBax1ODz8BUmEoOtjveZni/Is5MlALxJaXBTn/mVvaBUS+v16JvGGwViNnJ7Jq33a0ixOU7LNawGFwlUgEWVquzWOJEH+Ms5qSjgs6JswHfxNhpF0Pw1SUtmBu3KcNa6sAeHhtvpqwiqdM4FCXwkKSqqE97zCurvFeLfbIFt9G+FRzJbyg38hzNU6c8gMHvJ4/QTWNrBpuQ96tv/fXIyjomorC5uLe6qICivWiImMBTbmu6dgSs3JrPGfZcI4hSgdCAIXjIt/zloDL3UGo4yyr+7kjROVxIeQleLTTwnsJw2702sdaL++Eq2++vy69ydkb61TE2RsdxDcFxm/oi0+cBGb43+La40ZUx09Sy9Er/vEDZua+nJLqbMQhfzvcvJBsyZozaHNIheO7B+BHKWERgumEC3Q6iox+p/ummZSwZ98EGC/F1YfCnUbkK+/38i48FAMF/E5lycVOg8prKK3IdhtCUg9QPdlw2e5OeS2L2Uee4Aez66KbCAeYXCI+2p7N8EahZPyJQ41s1DHDe4="
+
+
 
 addons:
   coverity_scan:
     project:
-      name: "MycroftAI/mimic"
-      description: "TTS for Mycroft AI"
+      name: "zeehio/mimic-core"
+      description: "Core text to speech for mycroft"
     notification_email: sergioller@gmail.com
-    # build_command_prepend: "<Your build preprocessing command here>"
-    build_command: ./run_testsuite.sh
+    build_command_prepend: meson build --prefix="$PWD/install"
+    build_command: ninja -C build test install
     branch_pattern: coverity_scan
 
