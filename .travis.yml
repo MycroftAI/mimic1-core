@@ -82,7 +82,7 @@ addons:
       name: "zeehio/mimic-core"
       description: "Core text to speech for mycroft"
     notification_email: sergioller@gmail.com
-    build_command_prepend: meson build --prefix="$PWD/install"
-    build_command: ninja -C build test install
+    build_command_prepend: meson build_cov_scan --prefix="$PWD/install"
+    build_command: ninja -C build_cov_scan test install
     branch_pattern: coverity_scan
 
