@@ -174,13 +174,15 @@ endif
 dl_dep = c_compiler.find_library('dl', required: false)
 if host_system == 'windows' or dl_dep.found()
   conf_data.set('MIMIC_ENABLE_PLUGINS', 1)
-  library_prefix = 'libttsmimic_'
-  library_extension = 'so'
   if host_system == 'windows'
     library_prefix = 'ttsmimic_'
     library_extension = 'dll'
   elif host_system == 'darwin'
+    library_prefix = 'libttsmimic_'
     library_extension = 'dylib'
+  else
+    library_prefix = 'libttsmimic_'
+    library_extension = 'so'
   endif
   conf_data.set_quoted('MIMIC_PLUGIN_PREFIX', library_prefix)
   conf_data.set_quoted('MIMIC_PLUGIN_EXT', library_extension)
@@ -404,7 +406,7 @@ pkg.generate(libraries : ttsmimiccore,
              libraries_private: pkgconfig_lib_private,
              subdirs: 'ttsmimic',
              version: meson.project_version(),
-             variables: ['mimic_plugin_dir=@0@'.format(mimic_plugin_dir)])
+             variables: ['mimic_plugin_dir="@0@"'.format(mimic_plugin_dir)])
 
 
 ############# Binaries ####################
