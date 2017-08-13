@@ -333,10 +333,10 @@ ttsmimiccore = library('ttsmimiccore', sources,
                       dependencies: mimic_core_deps,
                       install: true)
 
-# Do not rename the ttsmimiccore_dep variable, as it is used by dependencies
-ttsmimiccore_dep = declare_dependency(link_with : ttsmimiccore,
-                                      dependencies: mimic_core_deps,
-                                      include_directories : includes)
+# Do not rename the ttsmimic_core_dep variable, as it is used by dependencies
+ttsmimic_core_dep = declare_dependency(link_with : ttsmimiccore,
+                                       dependencies: mimic_core_deps,
+                                       include_directories : includes)
 
 ############ Headers #################
 
@@ -407,15 +407,15 @@ pkg.generate(libraries : ttsmimiccore,
 ############# Binaries ####################
 
 mimicbin = executable('mimic', 'main/mimic_main.c', 
-                      dependencies: ttsmimiccore_dep,
+                      dependencies: ttsmimic_core_dep,
                       install: true)
 
 mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
-                           dependencies: ttsmimiccore_dep,
+                           dependencies: ttsmimic_core_dep,
                            install: true)
 
 compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
-                           dependencies: ttsmimiccore_dep,
+                           dependencies: ttsmimic_core_dep,
                            install: true)
 
 ########## Unit tests #########################
@@ -432,7 +432,7 @@ unit_tests =  [
 foreach test_name_args : unit_tests
    test_bin = executable(test_name_args[0], join_paths('unittests', test_name_args[0] + '_test_main.c'),
                          include_directories : includes,
-                         dependencies: ttsmimiccore_dep,
+                         dependencies: ttsmimic_core_dep,
                          c_args: test_name_args[1])
    test(test_name_args[0], test_bin)
 endforeach
@@ -451,7 +451,7 @@ command_line_tools = [
 foreach test_name : command_line_tools
    test_bin = executable(test_name, join_paths('testsuite', test_name + '_main.c'),
                          include_directories : includes,
-                         dependencies: [ttsmimiccore_dep, m_dep])
+                         dependencies: [ttsmimic_core_dep, m_dep])
    #test(test_name, test_bin)
 endforeach
 
