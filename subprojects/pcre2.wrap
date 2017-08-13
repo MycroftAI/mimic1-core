@@ -1,5 +1,5 @@
 [wrap-git]
 directory=pcre2-10.23
 url=https://github.com/zeehio/pcre2_meson.git
-revision=27a15e2d535760af6cbde7f27867019a36f59ccf
+revision=319ef6fc6b6db3bacd08dff0aacc527a8ad053a7
 

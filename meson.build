@@ -39,20 +39,11 @@ foreach h : check_headers
   endif
 endforeach
 
-
-# Check HTS Library:
-use_hts = get_option('enable-hts')
-use_hts_bundled = false
-if use_hts
-  conf_data.set('HAVE_HTSENGINE', 1)
-  # Check if we need the bundled hts: (a proper meson dependency for hts would be better)
-  use_hts_bundled = not c_compiler.has_header('HTS_engine.h')
-  if use_hts_bundled
-    message('HTSEngine was not detected, using bundled HTSEngine')
-  else
-    hts_dep = declare_dependency(link_with : 'HTSEngine')
-    mimic_core_deps += hts_dep
-  endif
+# Math library
+m_dep = c_compiler.find_library('m', required : false)
+if m_dep.found()
+  mimic_core_deps += m_dep
+  pkgconfig_lib_private += ['-lm']
 endif
 
 
@@ -62,12 +53,34 @@ includes = []
 sources = []
 
 
+# HTS engine
+
+hts_dep = dependency('HTSEngine', required: false)
+if hts_dep.found()
+  # A distribution added pkg-config support! :-)
+  pkgconfig_requires += ['HTSEngine']
+else
+  # hts_engine upstream does not provide pkg-config support
+  hts_dep = c_compiler.find_library('HTSEngine', required : false)
+  if not hts_dep.found()
+    # We compile it:
+    hts_engine_sub = subproject('HTSEngine')
+    hts_dep = hts_engine_sub.get_variable('libHTSEngine')
+    includes += [include_directories('subprojects/HTSEngine/include')]
+    pkgconfig_requires += ['HTSEngine']
+  endif
+endif
+
+mimic_core_deps += hts_dep
+
+
 # PCRE-2
 pcre2_dep = dependency('libpcre2-8', required: false)
 if not pcre2_dep.found()
   pcre2_sub = subproject('pcre2')
   pcre2_dep = pcre2_sub.get_variable('libpcre2_8')
-  includes += [include_directories('subprojects/pcre2-10.23/src')]
+  pcre2_includes = pcre2_sub.get_variable('includes')
+  includes += pcre2_includes
 endif
 
 mimic_core_deps += pcre2_dep
@@ -188,13 +201,6 @@ mimic_config_h = configure_file(output : 'mimic_core_config.h',
 mimic_include_top_build_dir = meson.current_build_dir()
 message('Top build dir: @0@'.format(meson.current_build_dir()))
 
-# Math library
-m_dep = c_compiler.find_library('m', required : false)
-if m_dep.found()
-  mimic_core_deps += m_dep
-  pkgconfig_lib_private += ['-lm']
-endif
-
 
 ###### src/audio ###############
 sources += [
@@ -232,21 +238,6 @@ sources += [
 
 ####### src/hts ###############
 sources += ['src/hts/flite_hts_engine.c']
-
-if use_hts_bundled
-  includes += include_directories('src/hts/hts_engine_API/include')
-  install_headers('src/hts/hts_engine_API/include/HTS_engine.h', subdir: 'ttsmimic')
-  sources += [
-    'src/hts/hts_engine_API/lib/HTS_audio.c',
-    'src/hts/hts_engine_API/lib/HTS_engine.c',
-    'src/hts/hts_engine_API/lib/HTS_misc.c',
-    'src/hts/hts_engine_API/lib/HTS_pstream.c',
-    'src/hts/hts_engine_API/lib/HTS_sstream.c',
-    'src/hts/hts_engine_API/lib/HTS_model.c',
-    'src/hts/hts_engine_API/lib/HTS_vocoder.c',
-    'src/hts/hts_engine_API/lib/HTS_gstream.c',
-    'src/hts/hts_engine_API/lib/HTS_label.c']
-endif
 
 ###### src/lexicon #########
 

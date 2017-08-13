@@ -1,0 +1,5 @@
+[wrap-git]
+directory=HTSEngine
+url=https://github.com/zeehio/htsengine_meson.git
+revision=5349550390a2acd9790cecbdb4efe84d6285b734
+
