@@ -238,7 +238,7 @@ const char* mimic_get_plugin_dir()
     if((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE)
     {
         cst_errmsg("Path not found: [%s]\n", plugdir);
-        return -1;
+        return 0;
     }
 
     do
