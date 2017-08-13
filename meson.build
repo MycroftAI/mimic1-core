@@ -55,6 +55,7 @@ sources = []
 # HTS engine
 
 hts_dep = dependency('HTSEngine', required: false)
+conf_data.set('HAVE_HTSENGINE', 1)
 if hts_dep.found()
   # A distribution added pkg-config support! :-)
   pkgconfig_requires += ['HTSEngine']
