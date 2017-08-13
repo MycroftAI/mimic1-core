@@ -48,7 +48,6 @@ endif
 
 
 # libttsmimic:
-#includes = [mimic_include_top_build_dir]
 includes = []
 sources = []
 
@@ -67,7 +66,7 @@ else
     hts_engine_sub = subproject('HTSEngine')
     hts_dep = hts_engine_sub.get_variable('libHTSEngine')
     hts_includes = hts_engine_sub.get_variable('includes')
-    includes += [hts_includes]
+    includes += hts_includes
     pkgconfig_requires += ['HTSEngine']
   endif
 endif
@@ -199,9 +198,7 @@ mimic_config_h = configure_file(output : 'mimic_core_config.h',
                                 configuration : conf_data, install: true,
                                 install_dir : join_paths(get_option('includedir'), 'ttsmimic'))
 
-mimic_include_top_build_dir = meson.current_build_dir()
-message('Top build dir: @0@'.format(meson.current_build_dir()))
-
+includes += include_directories('.')
 
 ###### src/audio ###############
 sources += [
