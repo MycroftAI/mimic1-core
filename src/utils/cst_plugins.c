@@ -185,11 +185,12 @@ const char* mimic_get_plugin_dir()
     /* Microsoft Windows (32-bit) */
     mimic_plugin_handler_t* mimic_plugin_load(const char *filename)
     {
+        mimic_plugin_handler_t *plug_hdl = NULL;
         HINSTANCE handle = NULL;
         handle = LoadLibrary(filename);
         if (handle == NULL)
         {
-            cst_errmsg("Cannot load %s: %s\n", filename, dlerror ());
+            cst_errmsg("Cannot load %s: %s\n", filename);
             return NULL;
         }
         mimic_plugin_t* plugin = (mimic_plugin_t*)GetProcAddress(handle, "mimic_plugin");
@@ -250,9 +251,9 @@ const char* mimic_get_plugin_dir()
         //  [sDir] and the file/foldername we just found:
         if (num_plugins < num_plugins_max)
         {
-          *pluglist[num_plugins] = malloc(strlen(plugdir) + strlen(fdFile.cFileName) + 2);
-          sprintf(*pluglist[num_plugins], "%s\\%s", plugdir, fdFile.cFileName);
-          numplugins++;
+          *pluginlist[num_plugins] = malloc(strlen(plugdir) + strlen(fdFile.cFileName) + 2);
+          sprintf(*pluginlist[num_plugins], "%s\\%s", plugdir, fdFile.cFileName);
+          num_plugins++;
         } else
         {
           cst_errmsg("Maximum number of loaded plugins reached\n");/* FIXME: Dynamic maximum */

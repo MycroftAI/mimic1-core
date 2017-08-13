@@ -140,4 +140,12 @@ int mimic_play_wave_client(cst_wave *w, const char *servername, int port,
     return CST_OK_FORMAT;
 }
 
+#else
+
+int mimic_play_wave_client(cst_wave *w, const char *servername, int port,
+                     const char *encoding)
+{
+    cst_errmsg("Could not play audio wave on %s:%d. Reason: Compiled without socket support\n", servername, port);
+    return -1;
+}
 #endif
