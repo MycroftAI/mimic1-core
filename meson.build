@@ -91,7 +91,9 @@ pkgconfig_requires += ['libpcre2-8']
 selected_audio = get_option('audio')
 selected_audio_is_auto = selected_audio == 'auto'
 if selected_audio == 'auto'
-  if host_system == 'windows' or host_system == 'cygwin' or host_system == 'darwin'
+  if host_system == 'windows' or host_system == 'cygwin' or host_system == 'mingw' or host_system == 'mingw64'
+    selected_audio = ['win32', 'portaudio', 'none']
+  elif host_system == 'darwin'
     selected_audio = ['portaudio', 'none']
   elif host_system == 'linux'
     selected_audio = ['alsa', 'pulseaudio', 'none']
@@ -152,13 +154,14 @@ foreach audio : selected_audio
         final_audio = audio
         conf_data.set('CST_AUDIO_FREEBSD', '')
       endif
-    elif audio == 'wince'
-      if c_compiler.has_header('mmsystem.h')
+    elif audio == 'win32'
+      winmm_lib = c_compiler.find_library('winmm', required: false)
+      if winmm_lib.found()
         have_audio = true
-        final_audio = audio
+        final_audio = 'win32'
+        mimic_core_deps += winmm_lib
+        pkgconfig_lib_private += ['-lwinmm']
         conf_data.set('CST_AUDIO_WINCE', '')
-        winmm_dep = declare_dependency(link_with : 'winmm')
-        mimic_core_deps += winmm_dep
       endif
     endif
   endif

@@ -1,4 +1,4 @@
 option('audio', type : 'combo',
        choices : ['auto', 'alsa', 'portaudio', 'none', 'sun', 'oss',
-                  'pulseaudio', 'wince'], value : 'auto')
+                  'pulseaudio', 'win32'], value : 'auto')
 
