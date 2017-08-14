@@ -66,21 +66,6 @@
 
 #include "flite_hts_engine.h"
 
-#if HAVE_HTSENGINE == 0
-
-#include "cst_error.h"
-
-CST_VAL_REGISTER_TYPE(flitehtsengine, Flite_HTS_Engine);
-
-void delete_flitehtsengine(Flite_HTS_Engine * f)
-{
-    cst_errmsg("HTS Engine not supported in this compiled version of mimic");
-    return;
-}
-
-#else /* HAVE_HTSENGINE */
-
-
 #define MAXBUFLEN 1024
 
 CST_VAL_REGISTER_TYPE(flitehtsengine, Flite_HTS_Engine);
@@ -548,5 +533,3 @@ char *mimic_hts_get_voice_file(const cst_voice *const v)
     cst_free(full_file);
     return NULL;
 }
-
-#endif /* HAVE_HTSENGINE */

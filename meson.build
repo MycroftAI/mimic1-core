@@ -55,7 +55,6 @@ sources = []
 # HTS engine
 
 hts_dep = dependency('HTSEngine', required: false)
-conf_data.set('HAVE_HTSENGINE', 1)
 if hts_dep.found()
   # A distribution added pkg-config support! :-)
   pkgconfig_requires += ['HTSEngine']
@@ -201,8 +200,7 @@ conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
 conf_data.set('PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
 
 mimic_config_h = configure_file(output : 'mimic_core_config.h',
-                                configuration : conf_data, install: true,
-                                install_dir : join_paths(get_option('includedir'), 'ttsmimic'))
+                                configuration : conf_data)
 
 includes += include_directories('.')
 

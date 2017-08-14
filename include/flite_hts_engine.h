@@ -48,20 +48,6 @@
 
 #include "mimic_core_config.h"
 
-#if HAVE_HTSENGINE == 0
-
-typedef struct _Flite_HTS_Engine {
-    void *not_supported;
-} Flite_HTS_Engine;
-
-#include "cst_val.h"
-#include "cst_utterance.h"
-
-CST_VAL_USER_TYPE_DCLS(flitehtsengine, Flite_HTS_Engine);
-void delete_flitehtsengine(Flite_HTS_Engine * f);
-
-#else /* HAVE_HTSENGINE */
-
 #ifdef __cplusplus
 #define FLITE_HTS_ENGINE_H_START extern "C" {
 #define FLITE_HTS_ENGINE_H_END   }
@@ -141,7 +127,5 @@ cst_utterance *hts_synth(cst_utterance *utt);
 char *mimic_hts_get_voice_file(const cst_voice *const v);
 
 FLITE_HTS_ENGINE_H_END;
-
-#endif /* HAVE_HTSENGINE */
 
 #endif /* FLITE_HTS_ENGINE_H */
