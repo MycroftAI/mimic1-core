@@ -299,6 +299,7 @@ sources += [
   'src/synth/cst_synth.c', 
   'src/synth/cst_utt_utils.c', 
   'src/synth/cst_voice.c', 
+  'src/synth/us_phrasing_cart.c', 
   'src/synth/mimic.c']
 
 ###### src/utils #########

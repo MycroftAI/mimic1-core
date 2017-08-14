@@ -44,6 +44,7 @@
 #include "cst_tokenstream.h"
 #include "cst_voice.h"
 #include "cst_wave.h"
+#include "cst_cart.h"
 
 typedef int (*cst_breakfunc) (cst_tokenstream *ts,
                               const char *token, cst_relation *tokens);
@@ -89,4 +90,8 @@ cst_utterance *apply_synth_module(cst_utterance *u,
                                   const cst_synth_module *mod);
 cst_utterance *apply_synth_method(cst_utterance *u,
                                   const cst_synth_module meth[]);
+
+/* The us_phrasing_cart is ok for most latin languages */
+extern const cst_cart us_phrasing_cart;
+
 #endif
