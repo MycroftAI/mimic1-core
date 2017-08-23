@@ -1,14 +1,15 @@
 # Mimic - The Mycroft TTS Engine
 
-[![Stories in Ready](https://badge.waffle.io/MycroftAI/mimic.png?label=ready&title=Ready)](https://waffle.io/MycroftAI/mimic)
-[![Build Status](https://travis-ci.org/MycroftAI/mimic.svg?branch=development)](https://travis-ci.org/MycroftAI/mimic)
-[![codecov.io](https://codecov.io/github/MycroftAI/mimic/coverage.svg?branch=development)](https://codecov.io/github/MycroftAI/mimic?branch=development)
-[![Coverity Scan](https://img.shields.io/coverity/scan/8420.svg)](https://scan.coverity.com/projects/mycroftai-mimic?tab=overview)
+[![Build Status](https://travis-ci.org/MycroftAI/mimic-core.svg?branch=development)](https://travis-ci.org/MycroftAI/mimic-core)
+[![codecov.io](https://codecov.io/github/MycroftAI/mimic/coverage.svg?branch=development)](https://codecov.io/github/MycroftAI/mimic-core?branch=development)
 
 Mimic is a fast, lightweight Text-to-speech engine developed by [Mycroft A.I.](https://mycroft.ai/) and [VocaliD](https://vocalid.co/), based on Carnegie Mellon University’s [Flite (Festival-Lite)](http://www.festvox.org/flite) software. Mimic takes in text and reads it out loud to create a high quality voice. 
 
-###### Official project site: [mimic.mycroft.ai](https://mimic.mycroft.ai/)
+This repository only contains the core of mimic. If you want to get all the language
+support and voices, please check out the [mimic-full](https://github.com/MycroftAI/mimic-full) repository,
+that builds mimic with all the language support and voices at once.
 
+More information of mimic at: [mimic.mycroft.ai](https://mimic.mycroft.ai/)
 
 ## Supported platforms
 
@@ -27,45 +28,51 @@ Mimic is a fast, lightweight Text-to-speech engine developed by [Mycroft A.I.](h
 This is the list of requirements. Below there is the commands needed on the most
 popular distributions and supported OS.
 
-- A good C compiler:
+- A C compiler:
   * Linux or Mac OSX: _Recommended:_ gcc or clang
-  * Windows: _Recommended:_ GCC under [Cygwin](https://cygwin.com/) or [mingw32](http://www.mingw.org/)
-- GNU make, automake and libtool
+  * Windows: _Recommended:_ GCC under [mingw64](https://mingw-w64.org)
+- [ninja](https://ninja-build.org/)
 - pkg-config
-- Optionally, PCRE2 library and headers (they are compiled otherwise)
 - An audio engine:
   * Linux: ALSA/PortAudio/PulseAudio (_Recommended:_ ALSA)
   * Mac OSX: PortAudio
-  * Windows: PortAudio
+  * Windows: PortAudio or WinMME (_Recommended:_ PortAudio)
+- Optionally, PCRE2 library and headers (they are compiled otherwise)
+- Optionally, The HTSEngine library and headers (they are compiled otherwise)
+
+## Dependencies:
 
 ### Linux
 
 ##### On Debian/Ubuntu
 ```
-$ sudo apt-get install gcc make pkg-config automake libtool libasound2-dev
+sudo apt-get install gcc pkg-config libasound2-dev python3-pip ninja-build
+pip3 install --user meson
 ```
 
 ##### On Fedora
 ```
-$ sudo dnf install gcc make pkgconfig automake libtool alsa-lib-devel
+sudo dnf install gcc pkgconfig alsa-lib-devel python3-pip ninja-build
+pip3 install --user meson
 ```
 
 ##### On Arch
 ```
-$ sudo pacman -S --needed install gcc make pkg-config automake libtool alsa-lib
+sudo pacman -S --needed install gcc pkg-config alsa-lib python-pip ninja
+pip3 install --user meson
 ```
-
 
 ### Mac OSX
 
 - Install *Brew*
   ```
-  $ /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+  /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
   ```
 
-- Install *pkg-config*, *automake*, *libtool*, *pcre2* and *PortAudio*
+- Install *python3*, *ninja*, *pkg-config*, *pcre2* and *PortAudio*
   ```
-  $ brew install pkg-config automake libtool portaudio pcre2
+  brew install python3 ninja pkg-config pcre2 portaudio
+  pip3 install --user meson
   ```
 
 ### Windows
@@ -76,86 +83,31 @@ The fastest and most straightforward way to build mimic for windows is by
 cross-compilation from linux. This requires some additional packages to be
 installed.
 
-On Ubuntu 16.04 (xenial):
-```
-sudo apt-get install gcc make pkg-config automake libtool libpcre2-dev wine binutils-mingw-w64-i686 mingw-w64-i686-dev gcc-mingw-w64-i686
+On Ubuntu:
 
 ```
-
-On Ubuntu 14.04 (trusty):
-
-```
-sudo apt-get install gcc make pkg-config automake libtool mingw32 mingw32-runtime wine
+sudo apt-get install binutils-mingw-w64-x86-64 mingw-w64-x86-64-dev gcc-mingw-w64-x86-64
 ```
 
+#### Native build
 
-#### Native Windows building
-
-- Audio device and audio libraries are optional, as mimic can write its output to a waveform file.
-- Some of the source files are quite large, that some C compilers might choke on these. So, *gcc* is recommended.
-- Visual C++ 6.0 is known to fail on the large diphone database files
-- The build process is **MUCH** slower on Windows.
-
+Install mingw-w64, ninja-build and meson. Install the portaudio library and headers
+optionally as well.
 
 ## Build
 
-### On a native build (not cross-compilation)
-
-- Clone the repository
-  ```
-  $ git clone https://github.com/MycroftAI/mimic.git
-  ```
-  
-- Navigate to mimic directory
-  ```
-  $ cd mimic
-  ```
-
-- Build and install missing dependencies (pcre2)
-  ```
-  $ ./dependencies.sh --prefix="/usr/local"
-  ```
-
-- Generate mimic build scripts
-  ```
-  $ ./autogen.sh
-  ```
-  
-- Configure.
-
-  ```
-  $ ./configure --prefix="/usr/local"
-  ```
-  
-- Build
-  ```
-  $ make
-  ```
-  
-- Check
-  ```
-  $ make check
-  ```
-
-### Cross compilation:
-
-- Run the windows build script:
-
+- **Regular:**
 ```
-./run_testsuite.sh winbuild
+meson build --prefix="$PWD/install" # Choose any installation prefix you want
+ninja -C build
+ninja -C build install # Depending on the prefix, this may need sudo privileges.
 ```
 
-- Test it: The directory `install` will contain `bin/mimic.exe` file
-
+- **Cross compilation Ubuntu -> Windows:**
 ```
-wine ./mimic.exe -t "hello world" 
+meson build --prefix="$PWD/install" --cross-file="cross/ubuntu-mingw64.txt"
+ninja -C build install
 ```
-
-- Distribute it
-
-You can distribute the compiled mimic by adding to a zip file everything in the
-`install/winbuild/bin` directory.
-
 
 ## Usage
 
