@@ -1,7 +1,7 @@
 # Mimic - The Mycroft TTS Engine
 
 [![Build Status](https://travis-ci.org/MycroftAI/mimic-core.svg?branch=development)](https://travis-ci.org/MycroftAI/mimic-core)
-[![codecov.io](https://codecov.io/github/MycroftAI/mimic/coverage.svg?branch=development)](https://codecov.io/github/MycroftAI/mimic-core?branch=development)
+[![codecov.io](https://codecov.io/github/MycroftAI/mimic-core/coverage.svg?branch=development)](https://codecov.io/github/MycroftAI/mimic-core?branch=development)
 
 Mimic is a fast, lightweight Text-to-speech engine developed by [Mycroft A.I.](https://mycroft.ai/) and [VocaliD](https://vocalid.co/), based on Carnegie Mellon University’s [Flite (Festival-Lite)](http://www.festvox.org/flite) software. Mimic takes in text and reads it out loud to create a high quality voice. 
 
