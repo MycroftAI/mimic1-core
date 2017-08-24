@@ -77,7 +77,7 @@ static void mimic_version()
     printf("  Carnegie Mellon University, Copyright (c) 1999-2011, all rights reserved\n");
     printf("  mimic developers, Copyright (c) 2016, all rights reserved\n");
     printf("  version: %s-%s (%s)\n",
-           PACKAGE_NAME, PACKAGE_VERSION, PACKAGE_URL);
+           MIMIC_PACKAGE_NAME, MIMIC_PACKAGE_VERSION, MIMIC_PACKAGE_URL);
 }
 
 static void mimic_usage()

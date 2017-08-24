@@ -195,9 +195,9 @@ else
   mimic_plugin_dir = ''
 endif
 
-conf_data.set('PACKAGE_NAME', '"' + meson.project_name() + '"')
-conf_data.set('PACKAGE_VERSION', '"' + meson.project_version() + '"')
-conf_data.set('PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
+conf_data.set('MIMIC_PACKAGE_NAME', '"' + meson.project_name() + '"')
+conf_data.set('MIMIC_PACKAGE_VERSION', '"' + meson.project_version() + '"')
+conf_data.set('MIMIC_PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
 
 mimic_config_h = configure_file(output : 'mimic_core_config.h',
                                 configuration : conf_data)
