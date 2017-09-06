@@ -87,9 +87,28 @@ void test_change_case_utf8()
     return;
 }
 
+void test_map_unicode_to_int()
+{
+ map_unicode_to_int* m = cst_unicode_int_map_create();
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"a", 0, 0) == m->not_found);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"à", 0, 0) == m->not_found);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"€", 0, 0) == m->not_found);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"🐨", 0, 0) == m->not_found);
+ cst_unicode_int_map(m, (const unsigned char*) "a", 1, 1);
+ cst_unicode_int_map(m, (const unsigned char*) "à", 1, 2);
+ cst_unicode_int_map(m, (const unsigned char*) "€", 1, 3);
+ cst_unicode_int_map(m, (const unsigned char*) "🐨", 1, 4);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*) "a", 0, 0) == 1);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"à", 0, 0) == 2);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"€", 0, 0) == 3);
+ TEST_CHECK(cst_unicode_int_map(m, (const unsigned char*)"🐨", 0, 0) == 4);
+ cst_unicode_int_map_delete(m);
+}
+
 TEST_LIST =
 {
     {"uregex_match", test_uregex_match},
     {"test_change_case_utf8", test_change_case_utf8},
+    {"test_map_unicode_to_int", test_map_unicode_to_int},
     {0}
 };

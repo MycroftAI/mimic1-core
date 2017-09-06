@@ -67,6 +67,23 @@ cst_string *cst_upcase(const cst_string *str);
 uint32_t utf8char_to_cp(const cst_string *const utf8char);
 void cp_to_utf8char(const uint32_t cp, unsigned char *utf8char);
 
+/* With this struct you can map unicode code points to int32_t in a reasonable way.
+   With ASCII you can simply create "int32_t vector[256];" and that is it, with
+   Unicode code points the full space would be 2^21, but we don't want to use all
+   that memory.
+*/
+typedef struct struct_map_unicode_to_int {
+    int32_t *v1;
+    int32_t **v2;
+    int32_t ***v3;
+    int32_t ****v4;
+    int32_t not_found; /* not found return value */
+    int freeable;
+} map_unicode_to_int;
+
+map_unicode_to_int* cst_unicode_int_map_create();
+void cst_unicode_int_map_delete(map_unicode_to_int *m);
+int32_t cst_unicode_int_map(map_unicode_to_int *m, const unsigned char *utf8char, int set, int32_t value);
 
 
 #endif

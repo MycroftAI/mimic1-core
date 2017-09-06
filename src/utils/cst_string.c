@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdint.h>
 #include "cst_alloc.h"
 #include "cst_string.h"
 #include "cst_file.h"
@@ -241,4 +242,245 @@ uint32_t utf8char_to_cp(const cst_string *const utf8char)
     }
 }
 
+map_unicode_to_int* cst_unicode_int_map_create()
+{
+  map_unicode_to_int *m = cst_alloc(map_unicode_to_int, 1);
+  m->v1 = NULL;
+  m->v2 = NULL;
+  m->v3 = NULL;
+  m->v4 = NULL;
+  m->not_found = INT32_MIN;
+  m->freeable = 1;
+  return m;
+}
+
+void cst_unicode_int_map_delete(map_unicode_to_int *m)
+{
+  if (m->freeable == 0)
+  {
+    return;
+  }
+  int i, j, k;
+  if(m->v1 != NULL)
+  {
+    cst_free(m->v1);
+  }
+  if (m->v2 != NULL)
+  {
+    for (i = 0; i < 32; i++)
+    {
+        if (m->v2[i] != NULL)
+        {
+            cst_free(m->v2[i]);
+        }
+    }
+    cst_free(m->v2);
+  }
+  if (m->v3 != NULL)
+  {
+    for (i = 0; i < 16; i++)
+    {
+      if (m->v3[i] != NULL)
+      {
+        for (j = 0; j < 64; j++)
+        {
+           if (m->v3[i][j] != NULL)
+           {
+              cst_free(m->v3[i][j]);
+           }
+        }
+        cst_free(m->v3[i]);
+      }
+    }
+    cst_free(m->v3);
+  }
+  if (m->v4 != NULL)
+  {
+    for (i = 0; i < 8; i++)
+    {
+      if (m->v4[i] != NULL)
+      {
+        for (j = 0; j < 64; j++)
+        {
+          if (m->v4[i][j] != NULL)
+          {
+            for (k = 0; k < 64; k++)
+            {
+              if (m->v4[i][j][k] != NULL)
+              {
+                cst_free(m->v4[i][j][k]);
+              }
+            }
+            cst_free(m->v4[i][j]);
+          }
+        }
+        cst_free(m->v4[i]);
+      }
+   }
+   cst_free(m->v4);
+ }
+ cst_free(m);
+}
+
+int32_t cst_unicode_int_map(map_unicode_to_int *m, const unsigned char *utf8char, int set, int32_t value)
+{
+  size_t utf8char_len = cst_strlen(utf8char);
+  int32_t *cl1, **cl2, ***cl3, ****cl4;
+  int idx = 0, i;
+  unsigned char c1;
+  if (utf8char_len > 4)
+  {
+    cst_errmsg("Wrong UTF-8 character %s\n", utf8char);
+    return m->not_found;
+  }
+  if (utf8char_len == 4)
+  {
+    if (m->v4 == NULL)
+    {
+      if (set)
+      {
+        m->v4 = cst_alloc(int32_t ***, 8); /* cst_alloc already sets to NULL */
+      }
+      else
+      {
+        return m->not_found;
+      }
+    }
+    cl4 = m->v4;
+    /* First character: 11110xxx */
+    c1 = utf8char[idx] & 0x07;
+    if (cl4[c1] == NULL)
+    {
+      if (set)
+      {
+        /* It has 10xxxxx -> 2^6 = 64 options */
+        cl4[c1] = cst_alloc(int32_t **, 64);
+      }
+      else
+      {
+        return m->not_found;
+      }
+    }
+    cl3 = cl4[c1];
+    idx++;
+  }
+  if (utf8char_len >= 3)
+  {
+    if (utf8char_len == 3)
+    {
+      if (m->v3 == NULL)
+      {
+        if (set)
+        {
+          m->v3 = cst_alloc(int32_t **, 16);
+        }
+        else
+        {
+          return m->not_found;
+        }
+      }
+
+      cl3 = m->v3;
+      /* First character: 1110xxxx */
+      c1 = utf8char[idx] & 0x0f;
+    }
+    else
+    {
+      /* Cont. char must be 10xxxxxx so we mask with b00111111 = 0x3f */
+      c1 = utf8char[idx] & 0x3f;
+    }
+    if (cl3[c1] == NULL)
+    {
+      if (set)
+      {
+        /* It has 10xxxxx -> 2^6 = 64 options */
+        cl3[c1] = cst_alloc(int32_t *, 64);
+      }
+      else
+      {
+        return m->not_found;
+      }
+    }
+    cl2 = cl3[c1];
+    idx++;
+  }
+  if (utf8char_len >= 2)
+  {
+    if (utf8char_len == 2)
+    {
+      if (m->v2 == NULL)
+      {
+        if (set)
+        {
+          m->v2 = cst_alloc(int32_t *, 32);
+        }
+        else
+        {
+          return m->not_found;
+        }
+      }
+      cl2 = m->v2;
+      /* 1st byte must be 110xxxxx so we mask with b00011111 = 0x1f */
+      c1 = utf8char[idx] & 0x1f;
+    }
+    else
+    {
+      /* Cont. char must be 10xxxxxx so we mask with b00111111 = 0x3f */
+      c1 = utf8char[idx] & 0x3f;
+    }
+    if (cl2[c1] == NULL)
+    {
+      if (set)
+      {
+        /* It has 10xxxxx -> 2^6 = 64 options */
+        cl2[c1] = cst_alloc(int32_t, 64);
+        for (i=0;i<64;i++)
+        {
+          cl2[c1][i] = m->not_found;
+        }
+      }
+      else
+      {
+        return m->not_found;
+      }
+    }
+    cl1 = cl2[c1];
+    idx++;
+  }
+  if (utf8char_len >= 1)
+  {
+    if (utf8char_len == 1)
+    {
+      if (m->v1 == NULL)
+      {
+        if (set)
+        {
+          m->v1 = cst_alloc(int32_t, 128);
+          for (i=0;i<128;i++)
+          {
+            m->v1[i] = m->not_found;
+          }
+        }
+        else
+        {
+          return m->not_found;
+        }
+      }
+      cl1 = m->v1;
+      /* 1st byte must be 0xxxxxxx so we mask with b01111111 = 0x7f */
+      c1 = utf8char[idx] & 0x7f;
+    }
+    else
+    {
+      /* Cont. char must be 10xxxxxx so we mask with b00111111 = 0x3f */
+      c1 = utf8char[idx] & 0x3f;
+    }
+    if (set)
+    {
+      cl1[c1] = value;
+    }
+    return cl1[c1];
+  }
+  return m->not_found;
+}
 
