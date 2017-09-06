@@ -70,11 +70,9 @@ void test_change_case_utf8()
     cst_string in[] = "¡hola MUNDO!";
     cst_string *out;
     out = cst_tolower_utf8(in);
-    printf("\nin: '%s'\tout: '%s'\n", in, out);
     TEST_CHECK(cst_streq(out, "¡hola mundo!"));
     cst_free(out);
     out = cst_toupper_utf8(in);
-    printf("in: '%s'\tout: '%s'\n", in, out);
     TEST_CHECK(cst_streq(out, "¡HOLA MUNDO!"));
     cst_free(out);
     // Test NULL input
