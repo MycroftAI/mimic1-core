@@ -40,40 +40,34 @@
 #ifndef _CST_LTS_H__
 #define _CST_LTS_H__
 
+#include <stdint.h>
 #include "cst_val.h"
+#include "cst_string.h"
 
-typedef unsigned short cst_lts_addr;
-typedef int cst_lts_phone;
+typedef uint16_t cst_lts_addr;
 typedef unsigned char cst_lts_feat;
-typedef unsigned char cst_lts_letter;
-typedef unsigned char cst_lts_model;
+typedef uint32_t cst_lts_letter;
+typedef cst_lts_letter cst_lts_phone; /* cst_lts_phone and cst_lts_letter must be of the same type */
 
-/* end of rule value */
+/* end of rule value: If this feature is found, we are on a terminal node */
 #define CST_LTS_EOR 255
 
 typedef struct cst_lts_rules_struct {
     char *name;
     const cst_lts_addr *letter_index;   /* index into model first state */
-    const cst_lts_model *models;
+    cst_lts_feat *feats;
+    cst_lts_letter *vals;
+    cst_lts_addr *qtrues;
+    cst_lts_addr *qfalses;
     const char *const *phone_table;
     int context_window_size;
-    int context_extra_feats;
-    const char *const *letter_table;
+    int context_extra_feats; /* Size of the extra features, measured in cst_lts_letter */
+    map_unicode_to_int *letter_table;
 } cst_lts_rules;
-
-/* Note this is designed to be 6 bytes */
-typedef struct cst_lts_rule_struct {
-    cst_lts_feat feat;
-    cst_lts_letter val;
-    cst_lts_addr qtrue;
-    cst_lts_addr qfalse;
-} cst_lts_rule;
 
 cst_lts_rules *new_lts_rules();
 
 cst_val *lts_apply(const char *word, const char *feats,
                    const cst_lts_rules *r);
-cst_val *lts_apply_val(const cst_val *wlist, const char *feats,
-                       const cst_lts_rules *r);
 
 #endif
