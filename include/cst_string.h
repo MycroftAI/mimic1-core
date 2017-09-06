@@ -41,6 +41,7 @@
 #define __CST_STRING_H__
 
 #include <string.h>
+#include <stdint.h>
 
 /* typedef unsigned char cst_string; */
 typedef char cst_string;
@@ -62,5 +63,10 @@ char *cst_strcat3(const char *a, const char *b, const char *c);
 
 cst_string *cst_downcase(const cst_string *str);
 cst_string *cst_upcase(const cst_string *str);
+
+uint32_t utf8char_to_cp(const cst_string *const utf8char);
+void cp_to_utf8char(const uint32_t cp, unsigned char *utf8char);
+
+
 
 #endif
