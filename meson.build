@@ -200,7 +200,8 @@ conf_data.set('MIMIC_PACKAGE_VERSION', '"' + meson.project_version() + '"')
 conf_data.set('MIMIC_PACKAGE_URL', '"https://github.com/MycroftAI/mimic-core/issues"')
 
 mimic_config_h = configure_file(output : 'mimic_core_config.h',
-                                configuration : conf_data)
+                                configuration : conf_data,
+                                install_dir:  join_paths(get_option('includedir'), 'ttsmimic'))
 
 includes += include_directories('.')
 
