@@ -38,27 +38,22 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include <stdlib.h>
-#include "cst_features.h"
 #include "cst_lts.h"
+#include "cst_features.h"
+#include <stdlib.h>
 
-static cst_lts_phone apply_model(cst_lts_letter * x_vals, cst_lts_addr start,
-                                 const cst_lts_feat *feats, const cst_lts_letter *vals,
-                                 const cst_lts_addr *qtrues, const cst_lts_addr *qfalses);
+static cst_lts_phone apply_model(cst_lts_letter *x_vals, cst_lts_addr start,
+                                 const cst_lts_rule *model);
 
 cst_lts_rules *new_lts_rules()
 {
     cst_lts_rules *lt = cst_alloc(cst_lts_rules, 1);
     lt->name = NULL;
-    lt->letter_index = NULL;
-    lt->feats = NULL;
-    lt->vals = NULL;
-    lt->qtrues = NULL;
-    lt->qfalses = NULL;
+    lt->model = NULL;
     lt->phone_table = NULL;
     lt->context_window_size = 0;
     lt->context_extra_feats = 0;
-    lt->letter_table = NULL;
+    lt->letter_index = NULL;
     return lt;
 }
 
@@ -75,18 +70,20 @@ cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
     cst_lts_phone phone;
     char *left, *right, *p;
     unsigned char utf8char[5];
-    if (r->letter_table == NULL)
+    if (r->letter_index == NULL)
     {
-        cst_errmsg("The letter_table that converts unicode code points to index is missing. Malformed LTS rules\n");
+        cst_errmsg("The letter_index that gives the initial rule for a given "
+                   "unicode code point is missing. Malformed LTS rules\n");
         return NULL;
     }
     /* For feature vals for each letter */
-    fval_buff = cst_alloc(cst_lts_letter,
-                          (r->context_window_size * 2) +
-                          r->context_extra_feats);
+    fval_buff = cst_alloc(cst_lts_letter, (r->context_window_size * 2) +
+                              r->context_extra_feats);
     /* Buffer with added contexts */
-    full_buff = cst_alloc(cst_lts_letter, (r->context_window_size * 2) + cst_strlen(word) + 1); /* TBD assumes single POS feat */
-    for (i = 0; i < r->context_window_size -1; i++)
+    full_buff =
+        cst_alloc(cst_lts_letter, (r->context_window_size * 2) +
+                      cst_strlen(word) + 1); /* TBD assumes single POS feat */
+    for (i = 0; i < r->context_window_size - 1; i++)
     {
         full_buff[i] = out_bounds;
     }
@@ -104,66 +101,66 @@ cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
     delete_val(utflets);
     full_buff[i] = word_limit;
     ++i;
-    for (i2 = i; i2 < i + r->context_window_size -1; i2++)
+    for (i2 = i; i2 < i + r->context_window_size - 1; i2++)
     {
         full_buff[i2] = out_bounds;
     }
 
     /* Do the prediction backwards so we don't need to reverse the answer */
     for (pos = r->context_window_size + num_cp_in_word - 1;
-         full_buff[pos] != word_limit;
-         pos--)
+         full_buff[pos] != word_limit; pos--)
     {
         /* Fill the features buffer for the predictor */
         /* This is the context before the letter: */
-        for (i=0;i < r->context_window_size; ++i)
+        for (i = 0; i < r->context_window_size; ++i)
         {
             fval_buff[i] = full_buff[pos - r->context_window_size + i];
         }
         /* This is the context after the letter: */
-        for (i2=0; i2 < r->context_window_size; ++i2)
+        for (i2 = 0; i2 < r->context_window_size; ++i2)
         {
-            fval_buff[i+i2] = full_buff[pos + 1 + i2];
+            fval_buff[i + i2] = full_buff[pos + 1 + i2];
         }
         /* Any extra additional feature:
-           TODO: The extra feats are not used anywhere in mimic -nor Flite that I (Sergio Oller)
-           know of-. This loop is always skipped. Here we assume ASCII or single bytes, but
-           feats could be UTF-8 parsed as well. If you need this, please open an issue.
+           TODO: The extra feats are not used anywhere in mimic -nor Flite that
+           I (Sergio Oller)
+           know of-. This loop is always skipped. Here we assume ASCII or single
+           bytes, but
+           feats could be UTF-8 parsed as well. If you need this, please open an
+           issue.
         */
-        for (i3=0; i3 < cst_strlen(feats); ++i3)
+        for (i3 = 0; i3 < cst_strlen(feats); ++i3)
         {
-            fval_buff[i+i2+i3] = feats[i3];
+            fval_buff[i + i2 + i3] = feats[i3];
         }
         /* full_buff[pos] contains the letter. We need to get the initial state
-           in the LTS rules for that letter. In ASCII it is trivial as we can map 256 cases
-           but in Unicode is not that simple as we may have up to 2^21 cases (although usually less than 256)
-           r->letter_index maps an index that represents a letter to the initial rule to check
-           r->letter_table has all the code points. The position of the code point is the index
-                           that points to 
+           in the LTS rules for that letter. In ASCII it is trivial as we can
+           map 256 cases but in Unicode is not that simple as we may have up to
+           2^21 cases (although usually less than 256) r->letter_index maps a
+           code point that represents a letter to the initial rule to check
         */
         cp_to_utf8char(full_buff[pos], utf8char);
-        index = cst_unicode_int_map(r->letter_table, utf8char, 0, 0);
-        if (index == r->letter_table->not_found)
+        index = cst_unicode_int_map(r->letter_index, utf8char, 0, 0);
+        if (index == r->letter_index->not_found)
         {
-          cst_errmsg("lts:skipping unknown char \"%s\"\n", utf8char);
+            // cst_errmsg("lts:skipping unknown char \"%s\"\n", utf8char);
+            continue;
         }
-        phone = apply_model(fval_buff, r->letter_index[index],
-                            r->feats, r->vals, r->qtrues, r->qfalses);
+        phone = apply_model(fval_buff, index, r->model);
         /* delete epsilons and split dual-phones */
         if (cst_streq("epsilon", r->phone_table[phone]))
             continue;
         else if ((p = strchr(r->phone_table[phone], '-')) != NULL)
         {
-            left = cst_substr(r->phone_table[phone], 0,
-                              cst_strlen(r->phone_table[phone]) -
-                              cst_strlen(p));
-            right =
-                cst_substr(r->phone_table[phone],
-                           (cst_strlen(r->phone_table[phone]) -
-                            cst_strlen(p)) + 1, (cst_strlen(p) - 1));
+            left =
+                cst_substr(r->phone_table[phone], 0,
+                           cst_strlen(r->phone_table[phone]) - cst_strlen(p));
+            right = cst_substr(
+                r->phone_table[phone],
+                (cst_strlen(r->phone_table[phone]) - cst_strlen(p)) + 1,
+                (cst_strlen(p) - 1));
             phones =
-                cons_val(string_val(left),
-                         cons_val(string_val(right), phones));
+                cons_val(string_val(left), cons_val(string_val(right), phones));
             cst_free(left);
             cst_free(right);
         }
@@ -177,18 +174,31 @@ cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
     return phones;
 }
 
-static cst_lts_phone apply_model(cst_lts_letter * x_vals, cst_lts_addr start,
-                                 const cst_lts_feat *feats, const cst_lts_letter *vals,
-                                 const cst_lts_addr *qtrues, const cst_lts_addr *qfalses)
+static inline cst_lts_feat get_feat(const cst_lts_feat_val feat_val)
+{
+    return (cst_lts_feat) ((feat_val & 0xFF000000) >> 24);
+}
+
+static inline cst_lts_letter get_val(const cst_lts_feat_val feat_val)
+{
+    return (cst_lts_letter)(feat_val & 0x001FFFFF);
+}
+
+static cst_lts_phone apply_model(cst_lts_letter *x_vals, cst_lts_addr start,
+                                 const cst_lts_rule *model)
 {
     cst_lts_addr nstate = start;
+    cst_lts_feat feat = get_feat(model[nstate].feat_val);
+    cst_lts_letter val = get_val(model[nstate].feat_val);
 
-    for (; feats[nstate] != CST_LTS_EOR;)
+    for (; feat != CST_LTS_EOR;)
     {
-        if (x_vals[feats[nstate]] == vals[nstate])
-            nstate = qtrues[nstate];
+        if (x_vals[feat] == val)
+            nstate = model[nstate].qtrue;
         else
-            nstate = qfalses[nstate];
+            nstate = model[nstate].qfalse;
+        feat = get_feat(model[nstate].feat_val);
+        val = get_val(model[nstate].feat_val);
     }
-    return vals[nstate];
+    return val;
 }
