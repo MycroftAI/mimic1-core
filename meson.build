@@ -420,6 +420,10 @@ mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
                            dependencies: ttsmimic_core_dep,
                            install: true)
 
+t2pbin = executable('t2p', 'main/t2p_main.c', 
+                      dependencies: ttsmimic_core_dep,
+                      install: true)
+
 compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
                            dependencies: ttsmimic_core_dep,
                            install: true)
