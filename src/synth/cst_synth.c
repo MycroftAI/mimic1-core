@@ -483,9 +483,10 @@ cst_utterance *default_lexical_insertion(cst_utterance *u)
     cst_item *ssword, *sssyl, *segitem, *sylitem, *seg_in_syl;
     const cst_val *vpn;
     int dp = 0;
+    const int use_addenda = get_param_int(u->features, "use_addenda", 1);
 
     lex = val_lexicon(feat_val(u->features, "lexicon"));
-    if (lex->lex_addenda)
+    if (lex->lex_addenda && use_addenda)
         lex_addenda = lex->lex_addenda;
 
     syl = utt_relation_create(u, "Syllable");

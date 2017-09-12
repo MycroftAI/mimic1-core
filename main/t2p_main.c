@@ -64,7 +64,8 @@ const cst_lang* mimic_get_lang(const char *lang)
     return NULL;
 }
 
-static cst_voice *voice_no_wave(const char *lang_code, const char *dialect)
+static cst_voice *voice_no_wave(const char *lang_code, const char *dialect,
+                                int use_addenda, int use_lexicon)
 {
     const cst_lang *lang = mimic_get_lang(lang_code);
     cst_voice *v = new_voice();
@@ -99,6 +100,8 @@ static cst_voice *voice_no_wave(const char *lang_code, const char *dialect)
             feat_set(v->features, "postlex_func", uttfunc_val(lex->postlex));
         }
     }
+    mimic_feat_set_int(v->features, "use_addenda", use_addenda);
+    mimic_feat_set_int(v->features, "use_lexicon", use_lexicon);
 
     /* Intonation */
     mimic_feat_set_string(v->features, "no_f0_target_model", "1");
@@ -118,12 +121,16 @@ int main(int argc, char **argv)
     cst_utterance *u;
     cst_item *s;
     const char *text, *lang, *dialect, *name;
+    int use_addenda = 1;
+    int use_lexicon = 1;
 
     files =
         cst_args(argv, argc,
                  "usage: t2p [OPTIONS]\n"
                  "-lang <string> Language code to transcribe\n"
                  "-dialect <string>  Dialect\n"
+                 "-disable_addenda <binary>  Disable addenda lookup\n"
+                 "-disable_lexicon <binary>  Disable lexicon lookup\n"
                  "-t <string>  Text\n"
                  "usage: t2p -lang en -t \"word word word\"\n"
                  "Convert text to phonemes.", args);
@@ -136,9 +143,16 @@ int main(int argc, char **argv)
     }
     lang = get_param_string(args, "-lang", "en");
     dialect = get_param_string(args, "-dialect", NULL);
-
+    if (cst_streq(get_param_string(args, "-disable_addenda", "false"), "true"))
+    {
+        use_addenda = 0;
+    }
+    if (cst_streq(get_param_string(args, "-disable_lexicon", "false"), "true"))
+    {
+        use_lexicon = 0;
+    }
     mimic_core_init();
-    v = voice_no_wave(lang, dialect);
+    v = voice_no_wave(lang, dialect, use_addenda, use_lexicon);
     if (v == NULL)
     {
        cst_errmsg("Could not load voice with language '%s' and dialect '%s'\n", lang, dialect == NULL ? "" : dialect);
