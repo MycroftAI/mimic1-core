@@ -305,6 +305,16 @@ Copyright: 1999-2014 Language Technologies Institute, Carnegie Mellon University
 License: flite
 
 Files:
+ src/cg/bb_mlsacore.c
+
+Copyright:
+ 2017-2018 Peter Drysdale and the authors of Bellbird
+ 2003-2004 Nagoya Institute of Technology, Aichi, Japan
+ 2003-2004 Nara Institute of Science and Technology, Nara, Japan
+ 2003-2004 Carnegie Mellon University, Pittsburgh, PA
+Licence BellBird
+
+Files:
  src/regex/regexp.c
  src/regex/regsub.c
 Copyright:
