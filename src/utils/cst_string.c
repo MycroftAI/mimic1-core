@@ -260,14 +260,13 @@ void cst_unicode_int_map_delete(map_unicode_to_int *m)
   {
     return;
   }
-  int i, j, k;
   if(m->v1 != NULL)
   {
     cst_free(m->v1);
   }
   if (m->v2 != NULL)
   {
-    for (i = 0; i < 32; i++)
+    for (int i = 0; i < 32; i++)
     {
         if (m->v2[i] != NULL)
         {
@@ -278,11 +277,11 @@ void cst_unicode_int_map_delete(map_unicode_to_int *m)
   }
   if (m->v3 != NULL)
   {
-    for (i = 0; i < 16; i++)
+    for (int i = 0; i < 16; i++)
     {
       if (m->v3[i] != NULL)
       {
-        for (j = 0; j < 64; j++)
+        for (int j = 0; j < 64; j++)
         {
            if (m->v3[i][j] != NULL)
            {
@@ -296,15 +295,15 @@ void cst_unicode_int_map_delete(map_unicode_to_int *m)
   }
   if (m->v4 != NULL)
   {
-    for (i = 0; i < 8; i++)
+    for (int i = 0; i < 8; i++)
     {
       if (m->v4[i] != NULL)
       {
-        for (j = 0; j < 64; j++)
+        for (int j = 0; j < 64; j++)
         {
           if (m->v4[i][j] != NULL)
           {
-            for (k = 0; k < 64; k++)
+            for (int k = 0; k < 64; k++)
             {
               if (m->v4[i][j][k] != NULL)
               {

@@ -59,7 +59,7 @@ cst_lts_rules *new_lts_rules()
 
 cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
 {
-    int pos, index;
+    int pos;
     size_t i, i2, i3, num_cp_in_word;
     const cst_val *v;
     cst_val *phones = NULL;
@@ -110,6 +110,7 @@ cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
     for (pos = r->context_window_size + num_cp_in_word - 1;
          full_buff[pos] != word_limit; pos--)
     {
+        int index;
         /* Fill the features buffer for the predictor */
         /* This is the context before the letter: */
         for (i = 0; i < r->context_window_size; ++i)

@@ -69,7 +69,6 @@ static cst_voice *voice_no_wave(const char *lang_code, const char *dialect,
 {
     const cst_lang *lang = mimic_get_lang(lang_code);
     cst_voice *v = new_voice();
-    cst_lexicon *lex;
 
     v->name = "no_wave_voice";
 
@@ -93,6 +92,7 @@ static cst_voice *voice_no_wave(const char *lang_code, const char *dialect,
     /* Lexicon */
     if (lang->lex_init != NULL)
     {
+        cst_lexicon *lex;
         lex = lang->lex_init();
         feat_set(v->features, "lexicon", lexicon_val(lex));
         if (lex->postlex != NULL)
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     cst_voice *v;
     cst_utterance *u;
     cst_item *s;
-    const char *text, *lang, *dialect, *name;
+    const char *text, *lang, *dialect;
     int use_addenda = 1;
     int use_lexicon = 1;
 
@@ -163,7 +163,7 @@ int main(int argc, char **argv)
 
     for (s = relation_head(utt_relation(u, "Segment")); s; s = item_next(s))
     {
-        name = item_feat_string(s, "name");
+        const char *name = item_feat_string(s, "name");
         printf("%s", name);
         /* If its a vowel and is stessed output stress value */
         if ((cst_streq("+", ffeature_string(s, "ph_vc"))) &&
