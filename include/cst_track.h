@@ -37,13 +37,13 @@
 /*  Waveforms                                                            */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_TRACK_H__
-#define _CST_TRACK_H__
+#ifndef CST_TRACK_H
+#define CST_TRACK_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_error.h"
 #include "cst_alloc.h"
-#include "cst_endian.h"
 #include "cst_file.h"
 #include "cst_val.h"
 
@@ -55,16 +55,16 @@ typedef struct cst_track_struct {
     float **frames;
 } cst_track;
 
-cst_track *new_track();
-void delete_track(cst_track *val);
+MIMIC_CORE_PUBLIC cst_track *new_track();
+MIMIC_CORE_PUBLIC void delete_track(cst_track *val);
 
-float track_frame_shift(cst_track *t, int frame);
-void cst_track_resize(cst_track *t, int num_frames, int num_channels);
-cst_track *cst_track_copy(const cst_track *t);
+MIMIC_CORE_PUBLIC float track_frame_shift(cst_track *t, int frame);
+MIMIC_CORE_PUBLIC void cst_track_resize(cst_track *t, int num_frames, int num_channels);
+MIMIC_CORE_PUBLIC cst_track *cst_track_copy(const cst_track *t);
 
-int cst_track_save_est(cst_track *t, const char *filename);
-int cst_track_save_est_binary(cst_track *t, const char *filename);
-int cst_track_load_est(cst_track *t, const char *filename);
+MIMIC_CORE_PUBLIC int cst_track_save_est(cst_track *t, const char *filename);
+MIMIC_CORE_PUBLIC int cst_track_save_est_binary(cst_track *t, const char *filename);
+MIMIC_CORE_PUBLIC int cst_track_load_est(cst_track *t, const char *filename);
 
 CST_VAL_USER_TYPE_DCLS(track, cst_track);
 #endif

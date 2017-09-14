@@ -82,6 +82,7 @@
 /* ----------------------------------------------------------------- */
 
 #include "cst_hrg.h"
+#include "cst_ffeatures.h"
 #include "cst_phoneset.h"
 #include "cst_regex.h"
 

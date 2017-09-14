@@ -37,9 +37,10 @@
 /*  General synth functions                                              */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _SYNTH_H__
-#define _SYNTH_H__
+#ifndef SYNTH_H
+#define SYNTH_H
 
+#include "cst_lib_visibility.h"
 #include "cst_hrg.h"
 #include "cst_tokenstream.h"
 #include "cst_voice.h"
@@ -48,8 +49,8 @@
 
 typedef int (*cst_breakfunc) (cst_tokenstream *ts,
                               const char *token, cst_relation *tokens);
-CST_VAL_USER_FUNCPTR_DCLS(breakfunc, cst_breakfunc);
-int default_utt_break(cst_tokenstream *ts,
+CST_VAL_USER_FUNCPTR_DCLS_VISIB(breakfunc, cst_breakfunc, MIMIC_CORE_PUBLIC);
+MIMIC_CORE_PUBLIC int default_utt_break(cst_tokenstream *ts,
                       const char *token, cst_relation *tokens);
 
 /* You must call utt_init before any of the others. */
@@ -65,19 +66,19 @@ typedef struct cst_dur_stats_struct {
     float stddev;
 } dur_stat;
 typedef dur_stat *dur_stats;    /* only one star, due to funky cst_val magic */
-CST_VAL_USER_TYPE_DCLS(dur_stats, dur_stats);
-cst_utterance *default_segmentanalysis(cst_utterance *u);
+CST_VAL_USER_TYPE_DCLS_VISIB(dur_stats, dur_stats, MIMIC_CORE_PUBLIC);
+MIMIC_CORE_PUBLIC cst_utterance *default_segmentanalysis(cst_utterance *u);
 
-cst_utterance *default_tokenization(cst_utterance *u);
-cst_utterance *default_textanalysis(cst_utterance *u);
-cst_val *default_tokentowords(cst_item *i);
-cst_utterance *default_phrasing(cst_utterance *u);
-cst_utterance *default_pos_tagger(cst_utterance *u);
-cst_utterance *default_lexical_insertion(cst_utterance *u);
-cst_utterance *default_pause_insertion(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *default_tokenization(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *default_textanalysis(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_val *default_tokentowords(cst_item *i);
+MIMIC_CORE_PUBLIC cst_utterance *default_phrasing(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *default_pos_tagger(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *default_lexical_insertion(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *default_pause_insertion(cst_utterance *u);
 
-cst_utterance *cart_intonation(cst_utterance *u);
-cst_utterance *cart_duration(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *cart_intonation(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *cart_duration(cst_utterance *u);
 
 cst_utterance *flat_prosody(cst_utterance *u);
 
@@ -92,6 +93,6 @@ cst_utterance *apply_synth_method(cst_utterance *u,
                                   const cst_synth_module meth[]);
 
 /* The us_phrasing_cart is ok for most latin languages */
-extern const cst_cart us_phrasing_cart;
+MIMIC_CORE_PUBLIC extern const cst_cart us_phrasing_cart;
 
 #endif

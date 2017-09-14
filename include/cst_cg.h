@@ -43,10 +43,11 @@
 /*  http://www.cs.cmu.edu/~awb/papers/is2006/IS061394.PDF                */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_CG_H__
-#define _CST_CG_H__
+#ifndef CST_CG_H
+#define CST_CG_H
 #include <stdint.h>
 
+#include "cst_lib_visibility.h"
 #include "cst_cart.h"
 #include "cst_track.h"
 #include "cst_wave.h"
@@ -124,10 +125,10 @@ typedef struct cst_cg_db_struct {
 #define CG_MODEL_VECTOR(M,N,X,Y)                                        \
     (M->model_min[Y]+((float)(M->N[X][Y])/65535.0*M->model_range[Y]))
 
-CST_VAL_USER_TYPE_DCLS(cg_db, cst_cg_db);
+CST_VAL_USER_TYPE_DCLS_VISIB(cg_db, cst_cg_db, MIMIC_CORE_PUBLIC);
 void delete_cg_db(cst_cg_db *db);
 
-cst_utterance *cg_synth(cst_utterance *utt);
+MIMIC_CORE_PUBLIC cst_utterance *cg_synth(cst_utterance *utt);
 cst_wave *mlsa_resynthesis(const cst_track *t,
                            const cst_track *str,
                            cst_cg_db *cg_db,

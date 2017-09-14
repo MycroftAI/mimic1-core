@@ -39,6 +39,7 @@
 /*************************************************************************/
 
 #include "cst_alloc.h"
+#include "cst_sigpr.h"
 
 void lpc2ref(const float *lpc, float *rfc, int order)
 {

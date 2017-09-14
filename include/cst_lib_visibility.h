@@ -1,6 +1,8 @@
 /*
- * Copyright 2016 Sergio Oller <sergioller@gmail.com>
-
+ * Macros to control mimic library visibility
+ * 
+ * Copyright 2017 Sergio Oller <sergioller@gmail.com>
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
  * met:
@@ -28,22 +30,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-#ifndef CST_UREGEX_H
-#define CST_UREGEX_H
 
-#include "mimic_core_config.h"
-#include "cst_lib_visibility.h"
-#include <stdint.h>
-#include <cst_string.h>
-
-#define PCRE2_CODE_UNIT_WIDTH 8
-#include <pcre2.h>
-
-typedef pcre2_code cst_uregex;
-MIMIC_CORE_PUBLIC cst_string *cst_toupper_utf8(const cst_string *in);
-MIMIC_CORE_PUBLIC cst_string *cst_tolower_utf8(const cst_string *in);
-MIMIC_CORE_PUBLIC cst_uregex *new_cst_uregex(cst_string *pattern, uint32_t options);
-MIMIC_CORE_PUBLIC void delete_cst_uregex(cst_uregex *uregex);
-MIMIC_CORE_PUBLIC int cst_uregex_match(cst_uregex *uregex, const cst_string *str);
-
+#ifndef CST_LIB_VISIBILITY_H
+#define CST_LIB_VISIBILITY_H
+/* DLLEXPORT/DLLIMPORT: Used in public symbols.
+    - DLLEXPORT: When the library is being compiled.
+    - DLLIMPORT: When the library is being used.
+   DLLPRIVATE: Used for private (hidden) symbols.
+*/
+#if defined(_WIN32) || defined(__CYGWIN__)
+  #if defined(__GNUC__) || defined(__clang__)
+    #define DLLEXPORT __attribute__ ((dllexport))
+    #define DLLIMPORT  __attribute__ ((dllimport))
+  #elif defined(_MSC_VER)
+    #define DLLEXPORT __declspec(dllexport)
+    #define DLLIMPORT __declspec(dllimport)
+  #endif
+  #define DLLPRIVATE 
+#else
+  #define DLLEXPORT __attribute__ ((visibility ("default")))
+  #define DLLIMPORT
+  #define DLLPRIVATE __attribute__ ((visibility ("hidden")))
 #endif
+
+/* In a mimic plugin feel free to reuse DLLEXPORT, DLLPRIVATE and DLLIMPORT
+ * by using a syntax similar to this in your plugin includes:
+ */
+#if defined(COMPILE_MIMIC_CORE)
+  #define MIMIC_CORE_PUBLIC DLLEXPORT
+  #define MIMIC_CORE_PRIVATE DLLPRIVATE
+#else
+  #define MIMIC_CORE_PUBLIC DLLIMPORT
+  #define MIMIC_CORE_PRIVATE 
+#endif
+
+#endif /* CST_LIB_VISIBILITY_H header guard */
+

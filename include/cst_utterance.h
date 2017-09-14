@@ -37,9 +37,10 @@
 /*  Utterances                                                           */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_UTTERANCE_H__
-#define _CST_UTTERANCE_H__
+#ifndef CST_UTTERANCE_H
+#define CST_UTTERANCE_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_features.h"
@@ -55,16 +56,16 @@ struct cst_utterance_struct {
 };
 
 /* Constructor functions */
-cst_utterance *new_utterance();
-void delete_utterance(cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_utterance *new_utterance();
+MIMIC_CORE_PUBLIC void delete_utterance(cst_utterance *u);
 
-cst_relation *utt_relation(const cst_utterance *u, const char *name);
-cst_relation *utt_relation_create(cst_utterance *u, const char *name);
-int utt_relation_delete(cst_utterance *u, const char *name);
-int utt_relation_present(cst_utterance *u, const char *name);
+MIMIC_CORE_PUBLIC cst_relation *utt_relation(const cst_utterance *u, const char *name);
+MIMIC_CORE_PUBLIC cst_relation *utt_relation_create(cst_utterance *u, const char *name);
+MIMIC_CORE_PUBLIC int utt_relation_delete(cst_utterance *u, const char *name);
+MIMIC_CORE_PUBLIC int utt_relation_present(cst_utterance *u, const char *name);
 
 typedef cst_utterance *(*cst_uttfunc) (cst_utterance *i);
-CST_VAL_USER_FUNCPTR_DCLS(uttfunc, cst_uttfunc);
+CST_VAL_USER_FUNCPTR_DCLS_VISIB(uttfunc, cst_uttfunc, MIMIC_CORE_PUBLIC);
 /* Allocate memory "locally" to an utterance, on platforms that
    support/require this (currently only WinCE) */
 #define cst_utt_alloc(UTT,TYPE,SIZE) ((TYPE *)cst_local_alloc((UTT)->ctx,sizeof(TYPE)*(SIZE)))

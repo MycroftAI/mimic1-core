@@ -78,10 +78,11 @@
  *	@(#)regexp.h	8.1 (Berkeley) 6/2/93
  */
 
-#ifndef _CST_REGEX_H__
-#define _CST_REGEX_H__
+#ifndef CST_REGEX_H
+#define CST_REGEX_H
 
 #include <stddef.h> /* for size_t */
+#include "cst_lib_visibility.h"
 
 /*
  * The first byte of the regexp internal "program" is actually this magic
@@ -106,10 +107,10 @@ typedef struct cst_regstate_struct {
     const char *bol;
 } cst_regstate;
 
-cst_regex *new_cst_regex(const char *str);
-void delete_cst_regex(cst_regex *r);
+MIMIC_CORE_PUBLIC cst_regex *new_cst_regex(const char *str);
+MIMIC_CORE_PUBLIC void delete_cst_regex(cst_regex *r);
 
-int cst_regex_match(const cst_regex *r, const char *str);
+MIMIC_CORE_PUBLIC int cst_regex_match(const cst_regex *r, const char *str);
 cst_regstate *cst_regex_match_return(const cst_regex *r, const char *str);
 
 /* Internal functions from original HS code */
@@ -141,17 +142,17 @@ void cst_regex_init();
 
 /* Regexps used in text processing (these are latin-alphabet specific
    and to some extent US English-specific) */
-extern const cst_regex *const cst_rx_white;
-extern const cst_regex *const cst_rx_alpha;
-extern const cst_regex *const cst_rx_uppercase;
-extern const cst_regex *const cst_rx_lowercase;
-extern const cst_regex *const cst_rx_alphanum;
-extern const cst_regex *const cst_rx_identifier;
-extern const cst_regex *const cst_rx_int;
-extern const cst_regex *const cst_rx_double;
-extern const cst_regex *const cst_rx_commaint;
-extern const cst_regex *const cst_rx_digits;
-extern const cst_regex *const cst_rx_dotted_abbrev;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_white;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_alpha;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_uppercase;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_lowercase;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_alphanum;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_identifier;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_int;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_double;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_commaint;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_digits;
+MIMIC_CORE_PUBLIC extern const cst_regex *const cst_rx_dotted_abbrev;
 
 /* Table of regexps used in CART trees (only one so far) */
 extern const cst_regex *const cst_regex_table[];

@@ -4,6 +4,12 @@ mimic_core_deps = []
 c_compiler = meson.get_compiler('c')
 host_system = host_machine.system()
 
+have_visibility_hidden = c_compiler.has_argument('-fvisibility=hidden')
+if have_visibility_hidden
+  add_project_arguments('-fvisibility=hidden', language: 'c')
+endif
+
+
 conf_data = configuration_data()
 
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), 'ttsmimic')
@@ -337,6 +343,7 @@ includes += include_directories('include')
 ttsmimiccore = library('ttsmimiccore', sources,
                       include_directories : includes,
                       dependencies: mimic_core_deps,
+                      c_args: ['-DCOMPILE_MIMIC_CORE'],
                       install: true)
 
 # Do not rename the ttsmimic_core_dep variable, as it is used by dependencies
@@ -355,7 +362,6 @@ ttsmimic_headers = [
   'include/cst_clunits.h',
   'include/cst_diphone.h',
   'include/cst_endian.h',
-  'include/cst_error.h',
   'include/cst_features.h',
   'include/cst_ffeatures.h',
   'include/cst_file.h',

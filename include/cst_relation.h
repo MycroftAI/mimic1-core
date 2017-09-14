@@ -37,9 +37,10 @@
 /*  Relation                                                             */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_RELATION_H__
-#define _CST_RELATION_H__
+#ifndef CST_RELATION_H
+#define CST_RELATION_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_features.h"
@@ -55,18 +56,18 @@ struct cst_relation_struct {
 };
 
 /* Constructor functions */
-cst_relation *new_relation(const char *name, cst_utterance *u);
+MIMIC_CORE_PUBLIC cst_relation *new_relation(const char *name, cst_utterance *u);
 
-void delete_relation(cst_relation *r);
+MIMIC_CORE_PUBLIC void delete_relation(cst_relation *r);
 
-cst_item *relation_head(cst_relation *r);
-cst_item *relation_tail(cst_relation *r);
-const char *relation_name(cst_relation *r);
+MIMIC_CORE_PUBLIC cst_item *relation_head(cst_relation *r);
+MIMIC_CORE_PUBLIC cst_item *relation_tail(cst_relation *r);
+MIMIC_CORE_PUBLIC const char *relation_name(cst_relation *r);
 
-cst_item *relation_append(cst_relation *r, cst_item *i);
-cst_item *relation_prepend(cst_relation *r, cst_item *i);
+MIMIC_CORE_PUBLIC cst_item *relation_append(cst_relation *r, cst_item *i);
+MIMIC_CORE_PUBLIC cst_item *relation_prepend(cst_relation *r, cst_item *i);
 
-int relation_load(cst_relation *r, const char *filename);
-int relation_save(cst_relation *r, const char *filename);
+MIMIC_CORE_PUBLIC int relation_load(cst_relation *r, const char *filename);
+MIMIC_CORE_PUBLIC int relation_save(cst_relation *r, const char *filename);
 
 #endif

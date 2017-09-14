@@ -37,9 +37,10 @@
 /*    String manipulation functions                                      */
 /*                                                                       */
 /*************************************************************************/
-#ifndef __CST_STRING_H__
-#define __CST_STRING_H__
+#ifndef CST_STRING_H
+#define CST_STRING_H
 
+#include "cst_lib_visibility.h"
 #include <string.h>
 #include <stdint.h>
 
@@ -48,20 +49,20 @@ typedef char cst_string;
 
 double cst_atof(const char *str);
 
-cst_string *cst_strdup(const cst_string *s);
-cst_string *cst_strchr(const cst_string *s, int c);
-cst_string *cst_strrchr(const cst_string *str, int c);
+MIMIC_CORE_PUBLIC cst_string *cst_strdup(const cst_string *s);
+MIMIC_CORE_PUBLIC cst_string *cst_strchr(const cst_string *s, int c);
+MIMIC_CORE_PUBLIC cst_string *cst_strrchr(const cst_string *str, int c);
 #define cst_strlen(s) (strlen((const char *)s))
 #define cst_streq(A,B) (strcmp(A,B) == 0)
 #define cst_streqn(A,B,N) (strncmp(A,B,N) == 0)
-int cst_member_string(const char *str, const char *const *slist);
+MIMIC_CORE_PUBLIC int cst_member_string(const char *str, const char *const *slist);
 char *cst_substr(const char *str, int start, int length);
 
 char *cst_string_before(const char *s, const char *c);
-char *cst_strcat(const char *a, const char *b);
+MIMIC_CORE_PUBLIC char *cst_strcat(const char *a, const char *b);
 char *cst_strcat3(const char *a, const char *b, const char *c);
 
-cst_string *cst_downcase(const cst_string *str);
+MIMIC_CORE_PUBLIC cst_string *cst_downcase(const cst_string *str);
 cst_string *cst_upcase(const cst_string *str);
 
 uint32_t utf8char_to_cp(const cst_string *const utf8char);

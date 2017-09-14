@@ -37,8 +37,10 @@
 /*    Basic wraparounds for malloc and free                              */
 /*                                                                       */
 /*************************************************************************/
-#ifndef __CST_ALLOC_H__
-#define __CST_ALLOC_H__
+#ifndef CST_ALLOC_H
+#define CST_ALLOC_H
+
+#include "cst_lib_visibility.h"
 
 #ifndef TRUE
 #define TRUE (1==1)
@@ -48,9 +50,9 @@
 #endif
 
 /* Global allocation (the only kind on Unix) */
-void *cst_safe_alloc(int size);
-void *cst_safe_calloc(int size);
-void *cst_safe_realloc(void *p, int size);
+MIMIC_CORE_PUBLIC void *cst_safe_alloc(int size);
+MIMIC_CORE_PUBLIC void *cst_safe_calloc(int size);
+MIMIC_CORE_PUBLIC void *cst_safe_realloc(void *p, int size);
 
 typedef void *cst_alloc_context;
 #define new_alloc_context(size)   (NULL)
@@ -65,6 +67,6 @@ typedef void *cst_alloc_context;
 #define cst_calloc(TYPE,SIZE) ((TYPE *)cst_safe_calloc(sizeof(TYPE)*(SIZE)))
 #define cst_realloc(P,TYPE,SIZE) ((TYPE *)cst_safe_realloc((void *)(P),sizeof(TYPE)*(SIZE)))
 
-void cst_free(void *p);
+MIMIC_CORE_PUBLIC void cst_free(void *p);
 
 #endif

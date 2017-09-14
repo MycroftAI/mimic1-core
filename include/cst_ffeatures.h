@@ -36,9 +36,10 @@
 /*  Language independant feature functions                               */
 /*************************************************************************/
 
-#ifndef _CST_FFEATURES_H
-#define _CST_FFEATURES_H
+#ifndef CST_FFEATURES_H
+#define CST_FFEATURES_H
 
+#include "cst_lib_visibility.h"
 #include "cst_val.h"
 #include "cst_item.h"
 
@@ -61,8 +62,8 @@ const cst_val *cg_phone_place(const cst_item *p);
 const cst_val *cg_phone_index(const cst_item *p);
 const cst_val *cg_phone_rindex(const cst_item *p);
 
-const cst_val *generic_gpos(const cst_item *word, const cst_val * const * const lang_gpos[]);
+MIMIC_CORE_PUBLIC const cst_val *generic_gpos(const cst_item *word, const cst_val * const * const lang_gpos[]);
 
-void basic_ff_register(cst_features *ffunctions);
+MIMIC_CORE_PUBLIC void basic_ff_register(cst_features *ffunctions);
 
 #endif /* _CST_FFEATURES_H */

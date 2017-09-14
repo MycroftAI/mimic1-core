@@ -48,10 +48,21 @@ extern const int cst_val_type_##NAME;                  \
 TYPE *val_##NAME(const cst_val *v);           \
 cst_val *NAME##_val(const TYPE *v);
 
+#define CST_VAL_USER_TYPE_DCLS_VISIB(NAME,TYPE,PREFIX) \
+extern const int cst_val_type_##NAME;                  \
+PREFIX TYPE *val_##NAME(const cst_val *v);           \
+PREFIX cst_val *NAME##_val(const TYPE *v);
+
 #define CST_VAL_USER_FUNCPTR_DCLS(NAME,TYPE)           \
 extern const int cst_val_type_##NAME;                  \
 TYPE val_##NAME(const cst_val *v);            \
 cst_val *NAME##_val(const TYPE v);
+
+#define CST_VAL_USER_FUNCPTR_DCLS_VISIB(NAME,TYPE,PREFIX)     \
+extern const int cst_val_type_##NAME;                  \
+PREFIX TYPE val_##NAME(const cst_val *v);            \
+PREFIX cst_val *NAME##_val(const TYPE v);
+
 
 #define CST_VAL_REGISTER_TYPE(NAME,TYPE)               \
 TYPE *val_##NAME(const cst_val *v)                     \

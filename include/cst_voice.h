@@ -37,9 +37,10 @@
 /*  Voice functions                                                      */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_VOICE_H__
-#define _CST_VOICE_H__
+#ifndef CST_VOICE_H
+#define CST_VOICE_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_features.h"
@@ -69,8 +70,8 @@ struct cst_lang_struct {
 typedef struct cst_lang_struct cst_lang;
 
 /* Constructor functions */
-cst_voice *new_voice();
-void delete_voice(cst_voice *u);
+MIMIC_CORE_PUBLIC cst_voice *new_voice();
+MIMIC_CORE_PUBLIC void delete_voice(cst_voice *u);
 
-CST_VAL_USER_TYPE_DCLS(voice, cst_voice);
+CST_VAL_USER_TYPE_DCLS_VISIB(voice, cst_voice, MIMIC_CORE_PUBLIC);
 #endif
