@@ -598,6 +598,10 @@ cst_utterance *flat_prosody(cst_utterance *u)
     cst_relation *targ_rel;
     float mean, stddev;
 
+
+    if (feat_present(u->features,"no_f0_target_model"))
+        return u;
+
     targ_rel = utt_relation_create(u, "Target");
     mean = get_param_float(u->features, "target_f0_mean", 100.0);
     mean *= get_param_float(u->features, "f0_shift", 1.0);
