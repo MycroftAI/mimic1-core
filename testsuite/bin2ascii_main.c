@@ -109,6 +109,7 @@ int main(int argc, char **argv)
                 {
                     fprintf(stderr, "bin2ascii: unknown data type \"%s\"",
                             datatype);
+                    fclose(fd);
                     return -1;
                 }
             }
@@ -116,6 +117,7 @@ int main(int argc, char **argv)
                 break;
             printf("\n");
         }
+        fclose(fd);
     }
 
     return 0;

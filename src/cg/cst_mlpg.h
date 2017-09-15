@@ -105,7 +105,7 @@
 #ifdef M_PI
 #define PI		M_PI
 #else
-#define PI		3.1415926535897932385
+#define PI		3.14159265358979323846
 #endif
 
 #define	WLEFT 0

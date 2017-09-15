@@ -246,7 +246,10 @@ cst_regex *hs_regcomp(const char *exp)
     regcode = r->program;
     regc(CST_REGMAGIC);
     if (reg(0, &flags) == NULL)
+    {
+        free(r);
         return (NULL);
+    }
 
     /* Dig out information for optimizations. */
     r->regstart = '\0';         /* Worst-case defaults. */

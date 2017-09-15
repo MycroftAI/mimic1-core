@@ -165,7 +165,7 @@
 #define FIXMUL (1<<FIXSHIFT)
 
 #ifndef M_PI
-#define M_PI 3.1415926535
+#define M_PI 3.14159265358979323846
 #endif
 
 #define sqr(a)	((a)*(a))
