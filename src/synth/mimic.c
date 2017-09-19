@@ -59,7 +59,7 @@
 /* mimic_main() */
 cst_val *mimic_voice_list = 0;
 cst_lang mimic_lang_list[20];
-int mimic_lang_list_length = 0;
+static int mimic_lang_list_length = 0;
 
 int mimic_core_init()
 {

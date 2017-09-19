@@ -38,137 +38,130 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include "cst_features.h"
 #include "cst_lts.h"
-#include "cst_endian.h"
+#include "cst_features.h"
+#include <stdlib.h>
 
-static cst_lts_phone apply_model(cst_lts_letter * vals,
-                                 cst_lts_addr start,
-                                 const cst_lts_model * model);
+static cst_lts_phone apply_model(cst_lts_letter *x_vals, cst_lts_addr start,
+                                 const cst_lts_rule *model);
 
 cst_lts_rules *new_lts_rules()
 {
     cst_lts_rules *lt = cst_alloc(cst_lts_rules, 1);
-    lt->name = 0;
-    lt->letter_index = 0;
-    lt->models = 0;
-    lt->phone_table = 0;
+    lt->name = NULL;
+    lt->model = NULL;
+    lt->phone_table = NULL;
     lt->context_window_size = 0;
     lt->context_extra_feats = 0;
-    lt->letter_table = 0;
+    lt->letter_index = NULL;
     return lt;
 }
 
-cst_val *lts_apply_val(const cst_val *wlist, const char *feats,
-                       const cst_lts_rules *r)
+cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r)
 {
-    /* for symbol to symbol mapping */
+    int pos;
+    size_t i, i2, i3, num_cp_in_word;
     const cst_val *v;
-    cst_val *p;
-    char *word;
-    int i, j;
-
-    word = cst_alloc(char, val_length(wlist) + 1);
-
-    for (v = wlist, i = 0; v; v = val_cdr(v), i++)
-    {
-        for (j = 0; r->letter_table[j]; j++)
-            if (cst_streq(val_string(val_car(v)), r->letter_table[j]))
-            {
-                word[i] = j;
-                break;
-            }
-        if (!r->letter_table[j])
-        {
-#if 0
-            printf("awb_debug unknown letter >%s<\n", val_string(val_car(v)));
-#endif
-            i--;                /* can't find this letter so skip it */
-        }
-    }
-
-    p = lts_apply(word, feats, r);
-    cst_free(word);
-
-    return p;
-}
-
-cst_val *lts_apply(const char *word, const char *feats,
-                   const cst_lts_rules *r)
-{
-    int pos, index, i;
-    cst_val *phones = 0;
+    cst_val *phones = NULL;
+    cst_val *utflets = NULL;
     cst_lts_letter *fval_buff;
     cst_lts_letter *full_buff;
+    const cst_lts_letter word_limit = 1, out_bounds = 2;
     cst_lts_phone phone;
     char *left, *right, *p;
-    char hash;
-    char zeros[8];
-
-    /* For feature vals for each letter */
-    fval_buff = cst_alloc(cst_lts_letter,
-                          (r->context_window_size * 2) +
-                          r->context_extra_feats);
-    /* Buffer with added contexts */
-    full_buff = cst_alloc(cst_lts_letter, (r->context_window_size * 2) + cst_strlen(word) + 1); /* TBD assumes single POS feat */
-    if (r->letter_table)
+    unsigned char utf8char[5];
+    if (r->letter_index == NULL)
     {
-        for (i = 0; i < 8; i++)
-            zeros[i] = 2;
-        cst_sprintf((char *) full_buff,
-                    "%.*s%c%s%c%.*s",
-                    r->context_window_size - 1, zeros,
-                    1, word, 1, r->context_window_size - 1, zeros);
-        hash = 1;
+        cst_errmsg("The letter_index that gives the initial rule for a given "
+                   "unicode code point is missing. Malformed LTS rules\n");
+        return NULL;
     }
-    else
+    /* For feature vals for each letter */
+    fval_buff = cst_alloc(cst_lts_letter, (r->context_window_size * 2) +
+                              r->context_extra_feats);
+    /* Buffer with added contexts */
+    full_buff =
+        cst_alloc(cst_lts_letter, (r->context_window_size * 2) +
+                      cst_strlen(word) + 1); /* TBD assumes single POS feat */
+    for (i = 0; i < r->context_window_size - 1; i++)
     {
-        /* Assumes l_letter is a char and context < 8 */
-        cst_sprintf((char *) full_buff,
-                    "%.*s#%s#%.*s",
-                    r->context_window_size - 1, "00000000",
-                    word, r->context_window_size - 1, "00000000");
-        hash = '#';
+        full_buff[i] = out_bounds;
+    }
+    full_buff[i] = word_limit;
+    ++i;
+    /* the word */
+    utflets = cst_utf8_explode(word);
+    /* For each UTF-8 character */
+    num_cp_in_word = 0;
+    for (v = utflets; v; v = val_cdr(v), ++i)
+    {
+        full_buff[i] = utf8char_to_cp(val_string(val_car(v)));
+        ++num_cp_in_word;
+    }
+    delete_val(utflets);
+    full_buff[i] = word_limit;
+    ++i;
+    for (i2 = i; i2 < i + r->context_window_size - 1; i2++)
+    {
+        full_buff[i2] = out_bounds;
     }
 
     /* Do the prediction backwards so we don't need to reverse the answer */
-    for (pos = r->context_window_size + cst_strlen(word) - 1;
-         full_buff[pos] != hash; pos--)
+    for (pos = r->context_window_size + num_cp_in_word - 1;
+         full_buff[pos] != word_limit; pos--)
     {
+        int index;
         /* Fill the features buffer for the predictor */
-        cst_sprintf((char *) fval_buff,
-                    "%.*s%.*s%s",
-                    r->context_window_size,
-                    full_buff + pos - r->context_window_size,
-                    r->context_window_size, full_buff + pos + 1, feats);
-        if ((!r->letter_table
-             && ((full_buff[pos] < 'a') || (full_buff[pos] > 'z'))))
+        /* This is the context before the letter: */
+        for (i = 0; i < r->context_window_size; ++i)
         {
-#ifdef EXCESSIVELY_CHATTY
-            cst_errmsg("lts:skipping unknown char \"%c\"\n", full_buff[pos]);
-#endif
+            fval_buff[i] = full_buff[pos - r->context_window_size + i];
+        }
+        /* This is the context after the letter: */
+        for (i2 = 0; i2 < r->context_window_size; ++i2)
+        {
+            fval_buff[i + i2] = full_buff[pos + 1 + i2];
+        }
+        /* Any extra additional feature:
+           TODO: The extra feats are not used anywhere in mimic -nor Flite that
+           I (Sergio Oller)
+           know of-. This loop is always skipped. Here we assume ASCII or single
+           bytes, but
+           feats could be UTF-8 parsed as well. If you need this, please open an
+           issue.
+        */
+        for (i3 = 0; i3 < cst_strlen(feats); ++i3)
+        {
+            fval_buff[i + i2 + i3] = feats[i3];
+        }
+        /* full_buff[pos] contains the letter. We need to get the initial state
+           in the LTS rules for that letter. In ASCII it is trivial as we can
+           map 256 cases but in Unicode is not that simple as we may have up to
+           2^21 cases (although usually less than 256) r->letter_index maps a
+           code point that represents a letter to the initial rule to check
+        */
+        cp_to_utf8char(full_buff[pos], utf8char);
+        index = cst_unicode_int_map(r->letter_index, utf8char, 0, 0);
+        if (index == r->letter_index->not_found)
+        {
+            // cst_errmsg("lts:skipping unknown char \"%s\"\n", utf8char);
             continue;
         }
-        if (r->letter_table)
-            index = full_buff[pos] - 3;
-        else
-            index = (full_buff[pos] - 'a') % 26;
-        phone = apply_model(fval_buff, r->letter_index[index], r->models);
+        phone = apply_model(fval_buff, index, r->model);
         /* delete epsilons and split dual-phones */
         if (cst_streq("epsilon", r->phone_table[phone]))
             continue;
         else if ((p = strchr(r->phone_table[phone], '-')) != NULL)
         {
-            left = cst_substr(r->phone_table[phone], 0,
-                              cst_strlen(r->phone_table[phone]) -
-                              cst_strlen(p));
-            right =
-                cst_substr(r->phone_table[phone],
-                           (cst_strlen(r->phone_table[phone]) -
-                            cst_strlen(p)) + 1, (cst_strlen(p) - 1));
+            left =
+                cst_substr(r->phone_table[phone], 0,
+                           cst_strlen(r->phone_table[phone]) - cst_strlen(p));
+            right = cst_substr(
+                r->phone_table[phone],
+                (cst_strlen(r->phone_table[phone]) - cst_strlen(p)) + 1,
+                (cst_strlen(p) - 1));
             phones =
-                cons_val(string_val(left),
-                         cons_val(string_val(right), phones));
+                cons_val(string_val(left), cons_val(string_val(right), phones));
             cst_free(left);
             cst_free(right);
         }
@@ -182,40 +175,31 @@ cst_val *lts_apply(const char *word, const char *feats,
     return phones;
 }
 
-static void cst_lts_get_state(cst_lts_rule * state,
-                              const cst_lts_model * model,
-                              unsigned short n, int rule_size)
-{                               /* As some OS's require a more elaborate access than a simple lookup */
-    memmove(state, &model[n * rule_size], rule_size);
+static inline cst_lts_feat get_feat(const cst_lts_feat_val feat_val)
+{
+    return (cst_lts_feat) ((feat_val & 0xFF000000) >> 24);
 }
 
-static cst_lts_phone apply_model(cst_lts_letter * vals, cst_lts_addr start,
-                                 const cst_lts_model * model)
+static inline cst_lts_letter get_val(const cst_lts_feat_val feat_val)
 {
-    /* because some machines (arm/mips) can't deal with addrs not on     */
-    /* word boundaries we use a static and copy the rule values each time */
-    /* so we know its properly aligned                                    */
-    /* Hmm this still might be wrong on some machines that align the      */
-    /* structure cst_lts_rules differently                                */
-    cst_lts_rule state;
-    unsigned short nstate;
-    static const int sizeof_cst_lts_rule = 6;
+    return (cst_lts_letter)(feat_val & 0x001FFFFF);
+}
 
-    cst_lts_get_state(&state, model, start, sizeof_cst_lts_rule);
-    for (; state.feat != CST_LTS_EOR;)
+static cst_lts_phone apply_model(cst_lts_letter *x_vals, cst_lts_addr start,
+                                 const cst_lts_rule *model)
+{
+    cst_lts_addr nstate = start;
+    cst_lts_feat feat = get_feat(model[nstate].feat_val);
+    cst_lts_letter val = get_val(model[nstate].feat_val);
+
+    for (; feat != CST_LTS_EOR;)
     {
-        /* printf("awb_debug %s %c %c %d\n",vals,vals[state.feat],state.val, 
-           (vals[state.feat] == state.val) ? 1 : 0);  */
-        if (vals[state.feat] == state.val)
-            nstate = state.qtrue;
+        if (x_vals[feat] == val)
+            nstate = model[nstate].qtrue;
         else
-            nstate = state.qfalse;
-        /* This should really happen at compilation time */
-        if (CST_BIG_ENDIAN)
-            nstate = SWAPINT16(nstate);
-
-        cst_lts_get_state(&state, model, nstate, sizeof_cst_lts_rule);
+            nstate = model[nstate].qfalse;
+        feat = get_feat(model[nstate].feat_val);
+        val = get_val(model[nstate].feat_val);
     }
-
-    return (cst_lts_phone) state.val;
+    return val;
 }

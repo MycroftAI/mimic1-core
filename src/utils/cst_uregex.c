@@ -40,8 +40,10 @@
 static cst_string *case_conv(const cst_string *in, int to_upper)
 {
     if (in == NULL)
+    {
         return NULL;
-    size_t out_len = 2 * strlen(in);
+    }
+    size_t out_len = 2*strlen(in) + 1;
     unsigned char *output = cst_alloc(unsigned char, out_len);
     if (output == NULL)
     {
@@ -65,7 +67,7 @@ static cst_string *case_conv(const cst_string *in, int to_upper)
     {
         PCRE2_UCHAR8 buffer[120];
         pcre2_get_error_message(result, buffer, 120);
-        fprintf(stderr, "Error case converting: %s\n", buffer);
+        fprintf(stderr, "Error '%s' when case converting (to %s): %s\n", buffer, to_upper ? "upper" : "lower", in);
     }
     delete_cst_uregex(ureg);
     return (cst_string *) output;

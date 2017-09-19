@@ -261,17 +261,27 @@ cst_val *lex_lookup(const cst_lexicon *l, const char *word, const char *pos,
     char *wp;
     cst_val *phones = 0;
     int found = FALSE;
+    const int use_addenda = get_param_int(feats, "use_addenda", 1);
+    const int use_lexicon = get_param_int(feats, "use_lexicon", 1);
 
     wp = cst_alloc(char, cst_strlen(word) + 2);
     cst_sprintf(wp, "%c%s", (pos ? pos[0] : '0'), word);
 
-    if (l->addenda)
+    if (l->addenda && use_addenda)
+    {
         phones = lex_lookup_addenda(wp, l, &found);
+    }
 
     if (!found)
     {
-        index = lex_lookup_bsearch(l, wp);
-
+        if (use_lexicon)
+        {
+            index = lex_lookup_bsearch(l, wp);
+        }
+        else
+        {
+            index = -1;
+        }
         if (index >= 0)
         {
             if (l->phone_hufftable)

@@ -483,9 +483,10 @@ cst_utterance *default_lexical_insertion(cst_utterance *u)
     cst_item *ssword, *sssyl, *segitem, *sylitem, *seg_in_syl;
     const cst_val *vpn;
     int dp = 0;
+    const int use_addenda = get_param_int(u->features, "use_addenda", 1);
 
     lex = val_lexicon(feat_val(u->features, "lexicon"));
-    if (lex->lex_addenda)
+    if (lex->lex_addenda && use_addenda)
         lex_addenda = lex->lex_addenda;
 
     syl = utt_relation_create(u, "Syllable");
@@ -596,6 +597,10 @@ cst_utterance *flat_prosody(cst_utterance *u)
     cst_item *s, *t;
     cst_relation *targ_rel;
     float mean, stddev;
+
+
+    if (feat_present(u->features,"no_f0_target_model"))
+        return u;
 
     targ_rel = utt_relation_create(u, "Target");
     mean = get_param_float(u->features, "target_f0_mean", 100.0);

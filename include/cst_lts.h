@@ -40,40 +40,47 @@
 #ifndef _CST_LTS_H__
 #define _CST_LTS_H__
 
+#include "cst_string.h"
 #include "cst_val.h"
+#include <stdint.h>
 
-typedef unsigned short cst_lts_addr;
-typedef int cst_lts_phone;
-typedef unsigned char cst_lts_feat;
-typedef unsigned char cst_lts_letter;
-typedef unsigned char cst_lts_model;
+typedef uint16_t cst_lts_addr;
+/* The feat typically holds which context character is the rule considering or
+ * CST_LTS_EOR if it is a terminal rule. As there are typically <=8 features, we
+ * can use a uint8_t type, that can hold up to 255 features (+ terminal rule) */
+typedef uint8_t cst_lts_feat;
+/* cst_lts_phone and cst_lts_letter must be of the same type to save space.
+ * They hold a unicode code point and therefore require 21 bits.
+ */
+typedef uint32_t cst_lts_letter;
+typedef cst_lts_letter cst_lts_phone;
+/* The feat_val type can hold both the cst_lts_feat and the cst_lts_letter type.
+ * Because cst_lts_letter requires 21 bits and cst_lts_feat requires 8 bits,
+ * there is a possible bit encoding to put both of them on a single uint32_t,
+ * saving space.*/
+typedef uint32_t cst_lts_feat_val;
 
-/* end of rule value */
-#define CST_LTS_EOR 255
-
-typedef struct cst_lts_rules_struct {
-    char *name;
-    const cst_lts_addr *letter_index;   /* index into model first state */
-    const cst_lts_model *models;
-    const char *const *phone_table;
-    int context_window_size;
-    int context_extra_feats;
-    const char *const *letter_table;
-} cst_lts_rules;
-
-/* Note this is designed to be 6 bytes */
 typedef struct cst_lts_rule_struct {
-    cst_lts_feat feat;
-    cst_lts_letter val;
+    cst_lts_feat_val feat_val;
     cst_lts_addr qtrue;
     cst_lts_addr qfalse;
 } cst_lts_rule;
 
+/* end of rule value: If this feature is found, we are on a terminal node */
+#define CST_LTS_EOR 255
+
+typedef struct cst_lts_rules_struct {
+    char *name;
+    cst_lts_rule *model;
+    const char *const *phone_table;
+    int context_window_size;
+    int context_extra_feats; /* Size of the extra features, measured in
+                                cst_lts_letter */
+    map_unicode_to_int *letter_index;
+} cst_lts_rules;
+
 cst_lts_rules *new_lts_rules();
 
-cst_val *lts_apply(const char *word, const char *feats,
-                   const cst_lts_rules *r);
-cst_val *lts_apply_val(const cst_val *wlist, const char *feats,
-                       const cst_lts_rules *r);
+cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r);
 
 #endif
