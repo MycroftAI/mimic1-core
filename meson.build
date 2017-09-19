@@ -361,7 +361,7 @@ ttsmimic_headers = [
   'include/cst_cg.h',
   'include/cst_clunits.h',
   'include/cst_diphone.h',
-  'include/cst_endian.h',
+  'include/cst_error.h',
   'include/cst_features.h',
   'include/cst_ffeatures.h',
   'include/cst_file.h',
