@@ -353,7 +353,7 @@ ttsmimic_core_dep = declare_dependency(link_with : ttsmimiccore,
 
 ############ Headers #################
 
-ttsmimic_headers = [
+ttsmimic_public_headers = [
   'include/cst_alloc.h',
   'include/cst_args.h',
   'include/cst_audio.h',
@@ -396,7 +396,7 @@ ttsmimic_headers = [
   'include/flite_hts_engine.h',
   'include/mimic.h']
 
-install_headers(ttsmimic_headers, subdir : 'ttsmimic')
+install_headers(ttsmimic_public_headers, subdir : 'ttsmimic')
 
 ########## Man pages ##############
 
@@ -440,20 +440,23 @@ compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
 
 ########## Unit tests #########################
 unit_tests =  [
-  ['hrg', []],
-  ['regex', []],
-  ['string', []],
-  ['token', ['-DTEST_FILE="' + join_paths(meson.current_source_dir(), 'unittests', 'data.one') + '"',
+  ['hrg', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['regex', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['string', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['token', ['-DCOMPILE_EXE_MIMIC_CORE',
+             '-DTEST_FILE="' + join_paths(meson.current_source_dir(), 'unittests', 'data.one') + '"',
                   '-DTEST_FILE_UTF8="' + join_paths(meson.current_source_dir(), 'unittests', 'data_utf8.txt') + '"']],
-  ['wave', ['-DA_WAV1="' + join_paths(meson.current_source_dir(), 'unittests', 'hello_world.wav') + '"',
+  ['wave', ['-DCOMPILE_EXE_MIMIC_CORE',
+            '-DA_WAV1="' + join_paths(meson.current_source_dir(), 'unittests', 'hello_world.wav') + '"',
             '-DA_WAV2="' + join_paths(meson.current_source_dir(), 'unittests', 'hi_again.wav') + '"']],
+  ['include_public_headers', []]
   ]
 
 foreach test_name_args : unit_tests
    test_bin = executable(test_name_args[0], join_paths('unittests', test_name_args[0] + '_test_main.c'),
                          include_directories : includes,
                          dependencies: ttsmimic_core_dep,
-                         c_args: ['-DCOMPILE_EXE_MIMIC_CORE'] + test_name_args[1])
+                         c_args: test_name_args[1])
    test(test_name_args[0], test_bin)
 endforeach
 
