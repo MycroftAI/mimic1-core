@@ -38,7 +38,7 @@
 /*                                                                       */
 /*************************************************************************/
 #include <stdlib.h>
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 #include "cst_string.h"
 #include "cst_cg_map.h"
 

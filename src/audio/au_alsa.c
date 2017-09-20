@@ -44,7 +44,7 @@
 #define _POSIX_C_SOURCE 200112L
 
 #include "cst_audio.h"
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 
 #ifdef CST_AUDIO_ALSA
 

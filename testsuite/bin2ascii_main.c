@@ -38,7 +38,7 @@
 /*************************************************************************/
 #include <stdio.h>
 #include <stdint.h>
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 #include "cst_wave.h"
 #include "cst_tokenstream.h"
 #include "cst_args.h"

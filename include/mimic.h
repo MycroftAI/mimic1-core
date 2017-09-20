@@ -76,6 +76,7 @@ MIMIC_CORE_PUBLIC int mimic_core_init();
 MIMIC_CORE_PUBLIC int mimic_core_exit();
 
 /* General top level functions */
+MIMIC_CORE_PUBLIC const cst_lang *mimic_lang_select(const char *lang);
 MIMIC_CORE_PUBLIC cst_voice *mimic_voice_select(const char *name);
 MIMIC_CORE_PUBLIC cst_voice *mimic_voice_load(const char *voice_filename);
 MIMIC_CORE_PUBLIC int mimic_voice_dump(cst_voice *voice, const char *voice_filename);
@@ -93,7 +94,7 @@ MIMIC_CORE_PUBLIC int mimic_voice_add_lex_addenda(cst_voice *v, const cst_string
 
 /* Lower lever user functions */
     cst_wave *mimic_text_to_wave(const char *text, cst_voice *voice);
-    cst_utterance *mimic_synth_text(const char *text, cst_voice *voice);
+    MIMIC_CORE_PUBLIC cst_utterance *mimic_synth_text(const char *text, cst_voice *voice);
     cst_utterance *mimic_synth_phones(const char *phones, cst_voice *voice);
 
     int mimic_ts_to_speech(cst_tokenstream *ts, cst_voice *voice,

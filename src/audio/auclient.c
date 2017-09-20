@@ -43,7 +43,7 @@
 /*                                                                       */
 /*************************************************************************/
 #include <stdlib.h>
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 #include "cst_file.h"
 #include "cst_socket.h"
 #include "cst_string.h"

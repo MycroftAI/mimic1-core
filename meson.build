@@ -343,7 +343,7 @@ includes += include_directories('include')
 ttsmimiccore = library('ttsmimiccore', sources,
                       include_directories : includes,
                       dependencies: mimic_core_deps,
-                      c_args: ['-DCOMPILE_MIMIC_CORE'],
+                      c_args: ['-DCOMPILE_LIB_MIMIC_CORE'],
                       install: true)
 
 # Do not rename the ttsmimic_core_dep variable, as it is used by dependencies
@@ -420,18 +420,22 @@ pkg.generate(libraries : ttsmimiccore,
 
 mimicbin = executable('mimic', 'main/mimic_main.c', 
                       dependencies: ttsmimic_core_dep,
+                      c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                       install: true)
 
 mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
                            dependencies: ttsmimic_core_dep,
+                           c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                            install: true)
 
 t2pbin = executable('t2p', 'main/t2p_main.c', 
                       dependencies: ttsmimic_core_dep,
+                      c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                       install: true)
 
 compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
                            dependencies: ttsmimic_core_dep,
+                           c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                            install: true)
 
 ########## Unit tests #########################
@@ -449,7 +453,7 @@ foreach test_name_args : unit_tests
    test_bin = executable(test_name_args[0], join_paths('unittests', test_name_args[0] + '_test_main.c'),
                          include_directories : includes,
                          dependencies: ttsmimic_core_dep,
-                         c_args: test_name_args[1])
+                         c_args: ['-DCOMPILE_EXE_MIMIC_CORE'] + test_name_args[1])
    test(test_name_args[0], test_bin)
 endforeach
 
@@ -467,6 +471,7 @@ command_line_tools = [
 foreach test_name : command_line_tools
    test_bin = executable(test_name, join_paths('testsuite', test_name + '_main.c'),
                          include_directories : includes,
+                         c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                          dependencies: [ttsmimic_core_dep, m_dep])
    #test(test_name, test_bin)
 endforeach

@@ -66,8 +66,8 @@ MIMIC_CORE_PRIVATE extern const int32_t cst_endian_loc;
 
 MIMIC_CORE_PRIVATE void swap_bytes_short(int16_t *b, size_t n);
 
-MIMIC_CORE_PUBLIC void swapdouble(double *d);
-MIMIC_CORE_PUBLIC void swapfloat(float *f);
+MIMIC_CORE_PROTECTED void swapdouble(double *d);
+MIMIC_CORE_PROTECTED void swapfloat(float *f);
 
 #endif /* Header guard */
 

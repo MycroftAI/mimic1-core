@@ -63,10 +63,10 @@ MIMIC_CORE_PUBLIC char *cst_strcat(const char *a, const char *b);
 char *cst_strcat3(const char *a, const char *b, const char *c);
 
 MIMIC_CORE_PUBLIC cst_string *cst_downcase(const cst_string *str);
-cst_string *cst_upcase(const cst_string *str);
+MIMIC_CORE_PUBLIC cst_string *cst_upcase(const cst_string *str);
 
-uint32_t utf8char_to_cp(const cst_string *const utf8char);
-void cp_to_utf8char(const uint32_t cp, unsigned char *utf8char);
+MIMIC_CORE_PUBLIC uint32_t utf8char_to_cp(const cst_string *const utf8char);
+MIMIC_CORE_PUBLIC void cp_to_utf8char(const uint32_t cp, unsigned char *utf8char);
 
 /* With this struct you can map unicode code points to int32_t in a reasonable way.
    With ASCII you can simply create "int32_t vector[256];" and that is it, with
@@ -82,9 +82,11 @@ typedef struct struct_map_unicode_to_int {
     int freeable;
 } map_unicode_to_int;
 
-map_unicode_to_int* cst_unicode_int_map_create();
-void cst_unicode_int_map_delete(map_unicode_to_int *m);
-int32_t cst_unicode_int_map(map_unicode_to_int *m, const unsigned char *utf8char, int set, int32_t value);
-
+MIMIC_CORE_PUBLIC map_unicode_to_int* cst_unicode_int_map_create();
+MIMIC_CORE_PUBLIC void cst_unicode_int_map_delete(map_unicode_to_int *m);
+MIMIC_CORE_PUBLIC int32_t cst_unicode_int_map(map_unicode_to_int *m,
+                                              const unsigned char *utf8char,
+                                              int set,
+                                              int32_t value);
 
 #endif

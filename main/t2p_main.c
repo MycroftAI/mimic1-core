@@ -50,24 +50,10 @@ static cst_utterance *no_wave_synth(cst_utterance *u)
     return u;
 }
 
-const cst_lang* mimic_get_lang(const char *lang)
-{
-    size_t i;
-    /* Search mimic_lang_list for lang_init() and lex_init(); */
-    for (i = 0; mimic_lang_list[i].lang; ++i)
-    {
-        if (cst_streq(lang, mimic_lang_list[i].lang))
-        {
-            return &mimic_lang_list[i];
-        }
-    }
-    return NULL;
-}
-
 static cst_voice *voice_no_wave(const char *lang_code, const char *dialect,
                                 int use_addenda, int use_lexicon)
 {
-    const cst_lang *lang = mimic_get_lang(lang_code);
+    const cst_lang *lang = mimic_lang_select(lang_code);
     cst_voice *v = new_voice();
 
     v->name = "no_wave_voice";

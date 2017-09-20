@@ -37,7 +37,7 @@
 /*  Waveforms                                                            */
 /*                                                                       */
 /*************************************************************************/
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 #include "cst_string.h"
 #include "cst_wave.h"
 #include "cst_file.h"
