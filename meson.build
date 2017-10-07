@@ -134,13 +134,13 @@ foreach audio : selected_audio
       have_audio = true
       final_audio = 'none'
     elif audio == 'pulseaudio'
-      pulseaudio_dep = dependency('libpulse', required: false)
+      pulseaudio_dep = dependency('libpulse-simple', required: false)
       if pulseaudio_dep.found()
         have_audio = true
         final_audio = audio
         conf_data.set('CST_AUDIO_PULSEAUDIO', '')
         mimic_core_deps += pulseaudio_dep
-        pkgconfig_requires += ['libpulse']
+        pkgconfig_requires += ['libpulse-simple']
       endif
     elif audio == 'sun'
       if c_compiler.has_header('sys/audioio.h')
