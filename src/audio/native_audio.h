@@ -181,4 +181,5 @@ int AUDIO_DRAIN_NATIVE(cst_audiodev *ad);
 int AUDIO_FLUSH_NATIVE(cst_audiodev *ad);
 int AUDIO_EXIT_NATIVE();
 
+extern volatile int shutdown_request;
 #endif

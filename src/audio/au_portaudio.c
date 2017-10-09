@@ -49,57 +49,7 @@
 #include <math.h>
 #include <portaudio.h>
 
-typedef struct {
-    void *buff;
-    long int bufpos;
-    long int num_frames;
-    int channels;
-    int sample_size;
-    volatile int abort_requested;
-} callback_data;
 
-
-static int pa_callback(const void *inputBuffer, void *outputBuffer,
-                       unsigned long framesPerBuffer,
-                       const PaStreamCallbackTimeInfo * timeInfo,
-                       PaStreamCallbackFlags statusFlags, void *userData)
-{
-    callback_data *data = (callback_data *) userData;
-    long int remaining_frames, do_frames, num_bytes;
-
-    (void) timeInfo;
-    (void) statusFlags;
-    (void) inputBuffer;
-
-    if (data->num_frames <= 0)
-    {
-        return paComplete;
-    }
-
-    if (data->abort_requested)
-    {
-        return paAbort;
-    }
-
-    /* Number of frames to process in this call: */
-    if (framesPerBuffer < data->num_frames)
-    {
-        do_frames = framesPerBuffer;
-        remaining_frames = data->num_frames - framesPerBuffer;
-    }
-    else
-    {
-        do_frames = data->num_frames;
-        remaining_frames = 0;
-    }
-    num_bytes = do_frames * data->channels * data->sample_size;
-    memcpy(outputBuffer, data->buff + data->bufpos, num_bytes);
-    data->bufpos += num_bytes;
-    data->num_frames = remaining_frames;
-    if (remaining_frames == 0)
-        return paComplete;
-    return paContinue;
-}
 
 
 typedef struct cst_audio_portaudiodata_struct {
@@ -107,7 +57,6 @@ typedef struct cst_audio_portaudiodata_struct {
     double sample_rate;
     long int bytes_per_frame;
     PaStream *stream;
-    callback_data *cd;
 } cst_audio_portaudiodata;
 
 
@@ -174,26 +123,28 @@ cst_audiodev *audio_open_portaudio(int sps, int channels, cst_audiofmt fmt)
     hdl->outputParameters->hostApiSpecificStreamInfo = NULL;
     hdl->sample_rate = (double) sps;
 
+    int err;
+
+    /* Stream */
+    err = Pa_OpenStream(&(hdl->stream), NULL,   /* no input */
+                        hdl->outputParameters, hdl->sample_rate, 64, paClipOff,   /* we won't output out of range samples? */
+                        NULL, NULL);
+    if (audio_error_portaudio(err) < 0)
+    {
+        audio_error_portaudio(err);
+        return NULL;
+    }
+    err = Pa_StartStream(hdl->stream);
+    if (audio_error_portaudio(err) < 0)
+    {
+        audio_error_portaudio(err);
+        return NULL;
+    }
+
     return ad;
 }
 
 int audio_drain_portaudio(cst_audiodev *ad)
-{
-    cst_audio_portaudiodata *hdl = ad->platform_data;
-    if (hdl->cd != NULL)
-    {
-        hdl->cd->abort_requested = 1;
-    }
-    return 0;
-}
-
-int audio_flush_portaudio(cst_audiodev *ad)
-{
-    /* audio_write_portaudio does everything */
-    return 0;
-}
-
-int audio_close_portaudio(cst_audiodev *ad)
 {
     if (ad != NULL)
     {
@@ -201,6 +152,53 @@ int audio_close_portaudio(cst_audiodev *ad)
             (cst_audio_portaudiodata *) ad->platform_data;
         if (hdl != NULL)
         {
+            int err = Pa_AbortStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+            err = Pa_StartStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+        }
+    }
+    return 0;
+}
+
+int audio_flush_portaudio(cst_audiodev *ad)
+{
+    int err;
+    if (ad != NULL)
+    {
+        cst_audio_portaudiodata *hdl =
+            (cst_audio_portaudiodata *) ad->platform_data;
+        if (hdl != NULL)
+        {
+            err = Pa_StopStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+            err = Pa_StartStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+        }
+    }
+    return 0;
+}
+
+int audio_close_portaudio(cst_audiodev *ad)
+{
+    int err;
+    if (ad != NULL)
+    {
+        cst_audio_portaudiodata *hdl =
+            (cst_audio_portaudiodata *) ad->platform_data;
+        if (hdl != NULL)
+        {
+            err = Pa_StopStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+            err = Pa_CloseStream(hdl->stream);
+            if (audio_error_portaudio(err) < 0)
+                return err;
+
             if (hdl->outputParameters != NULL)
             {
                 free(hdl->outputParameters);
@@ -232,38 +230,11 @@ int audio_write_portaudio(cst_audiodev *ad, void *buff, int num_bytes)
     int err;
     cst_audio_portaudiodata *hdl =
         (cst_audio_portaudiodata *) ad->platform_data;
-    PaStreamParameters *outputParameters = hdl->outputParameters;
-    double sample_rate = hdl->sample_rate;
     long int num_frames = num_bytes / hdl->bytes_per_frame;
-    /* Data for the callback function */
-    callback_data *data = cst_alloc(callback_data, 1);
-    data->buff = buff;
-    data->num_frames = num_frames;
-    data->channels = ad->channels;
-    data->bufpos = 0;
-    data->sample_size = mimic_audio_bps(ad->fmt);
-    data->abort_requested = 0;
-    hdl->cd = data;
-    /* Stream */
-    err = Pa_OpenStream(&(hdl->stream), NULL,   /* no input */
-                        outputParameters, sample_rate, 64, paClipOff,   /* we won't output out of range samples? */
-                        pa_callback, data);
+
+    err = Pa_WriteStream(hdl->stream, buff, num_frames);
     if (audio_error_portaudio(err) < 0)
         return err;
-    err = Pa_StartStream(hdl->stream);
-    if (audio_error_portaudio(err) < 0)
-        return err;
-    while ((err = Pa_IsStreamActive(hdl->stream)) == 1)
-    {
-        Pa_Sleep(100);
-    }
-    err = Pa_StopStream(hdl->stream);
-    if (audio_error_portaudio(err) < 0)
-        return err;
-    err = Pa_CloseStream(hdl->stream);
-    if (audio_error_portaudio(err) < 0)
-        return err;
-    free(data);
     return num_bytes;
 }
 
