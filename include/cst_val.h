@@ -41,12 +41,14 @@
 #define CST_VAL_H
 
 #include "mimic_core_config.h"
+#include "cst_endian.h"
 #include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_string.h"
 #include "cst_error.h"
 #include "cst_alloc.h"
 #include "cst_val_defs.h"
+#include <inttypes.h>
 
 /* Only CONS can be an even number */
 #define CST_VAL_TYPE_CONS    0
@@ -61,28 +63,47 @@ typedef struct cst_val_cons_struct {
     struct cst_val_struct *cdr;
 } cst_val_cons;
 
+/*
+ The cst_val_atom structure has the same size than the cst_val_cons in all
+ architectures.
+ The least significant bit of the `car` element in the cst_val_cons structure
+ should be in the same position than the least significant bit of the
+ type integer in the cst_val_atom structure. That's why the
+ "order here is important" comments exist.
+ */
 typedef struct cst_val_atom_struct {
-#ifdef WORDS_BIGENDIAN
-    short ref_count;
-    short type;                 /* order is here important */
+#ifdef CST_BIG_ENDIAN
+ #if MIMIC_CPU_BITS == 64
+    int32_t ref_count;            /* order is here important */
+    int32_t type;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t ref_count;
+    int16_t type;                 /* order is here important */
+ #else
+   #error "Unknown CPU bit size"
+ #endif
 #else
-#if (defined(__x86_64__) || defined(_M_X64))
-    int type;                   /* order is here important */
-    int ref_count;
-#else
-    short type;                 /* order is here important */
-    short ref_count;
-#endif
+ #if MIMIC_CPU_BITS == 64
+    int32_t type;                   /* order is here important */
+    int32_t ref_count;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t type;                 /* order is here important */
+    int16_t ref_count;
+ #else
+  #error "Unknown CPU bit size"
+ #endif
 #endif
     union {
-#if (defined(__x86_64__) || defined(_M_X64))
+#if MIMIC_CPU_BITS == 64
         double fval;
-        long long ival;
+        int64_t ival;
+        void *vval;
+#elif MIMIC_CPU_BITS == 32
+        float fval;
+        int32_t ival;
         void *vval;
 #else
-        float fval;
-        int ival;
-        void *vval;
+ #error "Unknown CPU bit size"
 #endif
     } v;
 } cst_val_atom;

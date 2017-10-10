@@ -19,7 +19,7 @@
 void test_copy(void)
 {
    cst_wave *w1 = new_wave();
-   cst_wave *w2 = new_wave();
+   cst_wave *w2;
    mimic_core_init();
    TEST_CHECK(cst_wave_load_riff(w1, A_WAV1) == 0);
    w2 = copy_wave(w1);

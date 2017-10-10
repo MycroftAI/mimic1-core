@@ -37,15 +37,19 @@
 /*  Typed values                                                          */
 /*                                                                       */
 /*************************************************************************/
+#include <assert.h>
 #include <math.h>
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_string.h"
 #include "cst_tokenstream.h"
+#include <inttypes.h>
 
 static cst_val *new_val()
 {
-    return cst_alloc(struct cst_val_struct, 1);
+    cst_val *res = cst_alloc(struct cst_val_struct, 1);
+    assert(((uintptr_t)res) % 2 == 0);
+    return res;
 }
 
 cst_val *int_val(int i)
