@@ -312,7 +312,7 @@ Copyright:
  2003-2004 Nagoya Institute of Technology, Aichi, Japan
  2003-2004 Nara Institute of Science and Technology, Nara, Japan
  2003-2004 Carnegie Mellon University, Pittsburgh, PA
-Licence BellBird
+Licence: BellBird
 
 Files:
  src/regex/regexp.c
