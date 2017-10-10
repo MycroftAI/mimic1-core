@@ -37,9 +37,10 @@
 /*  Audio                                                                */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_AUDIO_H__
-#define _CST_AUDIO_H__
+#ifndef CST_AUDIO_H
+#define CST_AUDIO_H
 
+#include "cst_lib_visibility.h"
 #include "mimic_core_config.h"
 
 #include "cst_wave.h"
@@ -75,21 +76,21 @@ typedef struct cst_audiodev_struct {
 } cst_audiodev;
 
 /* Generic audio functions */
-int mimic_audio_init();
+MIMIC_CORE_PUBLIC int mimic_audio_init();
 cst_audiodev *mimic_audio_open(int sps, int channels, cst_audiofmt fmt);
 int mimic_audio_close(cst_audiodev *ad);
 int mimic_audio_write(cst_audiodev *ad, void *buff, int num_bytes);
 int mimic_audio_flush(cst_audiodev *ad);      /* wait for buffers to empty */
 int mimic_audio_drain(cst_audiodev *ad);      /* empty buffers now */
-int mimic_audio_exit();
+MIMIC_CORE_PUBLIC int mimic_audio_exit();
 
 /* Generic high level audio functions */
-int mimic_play_wave(cst_wave *w);
-int mimic_play_wave_sync(cst_wave *w, cst_relation *rel,
+MIMIC_CORE_PUBLIC int mimic_play_wave(cst_wave *w);
+MIMIC_CORE_PUBLIC int mimic_play_wave_sync(cst_wave *w, cst_relation *rel,
                    int (*call_back) (cst_item *));
-int mimic_play_wave_client(cst_wave *w, const char *servername, int port,
+MIMIC_CORE_PUBLIC int mimic_play_wave_client(cst_wave *w, const char *servername, int port,
                      const char *encoding);
-int auserver(int port);
+MIMIC_CORE_PUBLIC int auserver(int port);
 
 /* Play wave to specified device */
 int mimic_play_wave_device(cst_wave *w, cst_audiodev *ad);
@@ -115,16 +116,16 @@ typedef struct cst_audio_streaming_info_struct {
     /* But this is *not* updated automatically */
     void *userdata;
 } cst_audio_streaming_info;
-cst_audio_streaming_info *new_audio_streaming_info();
+MIMIC_CORE_PUBLIC cst_audio_streaming_info *new_audio_streaming_info();
 void delete_audio_streaming_info(cst_audio_streaming_info *asi);
-CST_VAL_USER_TYPE_DCLS(audio_streaming_info, cst_audio_streaming_info);
+CST_VAL_USER_TYPE_DCLS_VISIB(audio_streaming_info, cst_audio_streaming_info, MIMIC_CORE_PUBLIC);
 typedef int (*cst_audio_stream_callback) (const cst_wave *w, int start,
                                           int size, int last,
                                           cst_audio_streaming_info *asi);
 
 /* An example audio streaming callback function src/audio/au_streaming.c */
-int audio_stream_chunk(const cst_wave *w, int start, int size,
+MIMIC_CORE_PUBLIC int audio_stream_chunk(const cst_wave *w, int start, int size,
                        int last, cst_audio_streaming_info *asi);
 
-void mimic_audio_shutdown(int signum);
+MIMIC_CORE_PUBLIC void mimic_audio_shutdown(int signum);
 #endif

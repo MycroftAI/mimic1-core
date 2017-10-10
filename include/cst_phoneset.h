@@ -37,9 +37,10 @@
 /*  Phoneset functions                                                   */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_PHONESET_H__
-#define _CST_PHONESET_H__
+#ifndef CST_PHONESET_H
+#define CST_PHONESET_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_features.h"
@@ -61,16 +62,16 @@ typedef struct cst_phoneset_struct cst_phoneset;
 cst_phoneset *new_phoneset();
 void delete_phoneset(const cst_phoneset *u);
 
-const cst_val *phone_feature(const cst_phoneset *ps,
+MIMIC_CORE_PUBLIC const cst_val *phone_feature(const cst_phoneset *ps,
                              const char *phonename, const char *featname);
-const char *phone_feature_string(const cst_phoneset *ps,
+MIMIC_CORE_PUBLIC const char *phone_feature_string(const cst_phoneset *ps,
                                  const char *phonename, const char *featname);
 int phone_id(const cst_phoneset *ps, const char *phonename);
 int phone_feat_id(const cst_phoneset *ps, const char *featname);
 
-const cst_phoneset *item_phoneset(const cst_item *i);
+MIMIC_CORE_PUBLIC const cst_phoneset *item_phoneset(const cst_item *i);
 
-CST_VAL_USER_TYPE_DCLS(phoneset, cst_phoneset);
+CST_VAL_USER_TYPE_DCLS_VISIB(phoneset, cst_phoneset, MIMIC_CORE_PUBLIC);
 
 /* If a a voice model was trained with a different
  * phoneset than the mimic language model, these

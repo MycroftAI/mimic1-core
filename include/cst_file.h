@@ -37,8 +37,10 @@
 /*  Some File stuff                                                      */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_FILE_H__
-#define _CST_FILE_H__
+#ifndef CST_FILE_H
+#define CST_FILE_H
+
+#include "cst_lib_visibility.h"
 
 #define CST_WRONG_FORMAT -2
 #define CST_ERROR_FORMAT -1
@@ -78,7 +80,7 @@ cst_file cst_fopen(const char *path, int mode);
 long cst_fwrite(cst_file fh, const void *buf, long size, long count);
 long cst_fread(cst_file fh, void *buf, long size, long count);
 int cst_fprintf(cst_file fh, const char *fmt, ...);
-int cst_sprintf(char *s, const char *fmt, ...);
+MIMIC_CORE_PUBLIC int cst_sprintf(char *s, const char *fmt, ...);
 int cst_fclose(cst_file fh);
 int cst_fgetc(cst_file fh);
 int cst_file_exists(const char *path);

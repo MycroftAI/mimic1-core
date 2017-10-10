@@ -144,6 +144,21 @@ int mimic_add_lang(const char *langname,
     return TRUE;
 }
 
+const cst_lang* mimic_lang_select(const char *lang)
+{
+    size_t i;
+    /* Search mimic_lang_list for lang_init() and lex_init(); */
+    for (i = 0; mimic_lang_list[i].lang; ++i)
+    {
+        if (cst_streq(lang, mimic_lang_list[i].lang))
+        {
+            return &mimic_lang_list[i];
+        }
+    }
+    return NULL;
+}
+
+
 
 cst_voice *mimic_voice_select(const char *name)
 {

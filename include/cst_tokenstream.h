@@ -37,10 +37,11 @@
 /*  Tokenizer for strings and files                                      */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_TOKENSTREAM_H__
-#define _CST_TOKENSTREAM_H__
+#ifndef CST_TOKENSTREAM_H
+#define CST_TOKENSTREAM_H
 
 #include "cst_alloc.h"
+#include "cst_lib_visibility.h"
 #include "cst_string.h"
 #include "cst_file.h"
 #include "cst_features.h"
@@ -132,15 +133,15 @@ typedef struct cst_tokenstream_struct {
  * @return Returns 0 if the given character does not belong to the given
  *         class. It returns the class otherwise.
  */
-int ts_charclass(const cst_string *const utf8char, int cclass, cst_tokenstream *ts);
+MIMIC_CORE_PUBLIC int ts_charclass(const cst_string *const utf8char, int cclass, cst_tokenstream *ts);
 
-extern const cst_string *const cst_ts_default_whitespacesymbols;
-extern const cst_string *const cst_ts_default_prepunctuationsymbols;
-extern const cst_string *const cst_ts_default_postpunctuationsymbols;
-extern const cst_string *const cst_ts_default_singlecharsymbols;
+MIMIC_CORE_PUBLIC extern const cst_string *const cst_ts_default_whitespacesymbols;
+MIMIC_CORE_PUBLIC extern const cst_string *const cst_ts_default_prepunctuationsymbols;
+MIMIC_CORE_PUBLIC extern const cst_string *const cst_ts_default_postpunctuationsymbols;
+MIMIC_CORE_PUBLIC extern const cst_string *const cst_ts_default_singlecharsymbols;
 
 /* Public functions for tokenstream manipulation */
-cst_tokenstream *ts_open(const char *filename,
+MIMIC_CORE_PUBLIC cst_tokenstream *ts_open(const char *filename,
                          const cst_string *whitespacesymbols,
                          const cst_string *singlecharsymbols,
                          const cst_string *prepunctsymbols,
@@ -168,10 +169,10 @@ cst_tokenstream *ts_open_generic(const char *filename,
                                  int (*tell) (cst_tokenstream *ts),
                                  int (*size) (cst_tokenstream *ts),
                                  int (*getc) (cst_tokenstream *ts));
-void ts_close(cst_tokenstream *ts);
+MIMIC_CORE_PUBLIC void ts_close(cst_tokenstream *ts);
 
-int ts_eof(cst_tokenstream *ts);
-const cst_string *ts_get(cst_tokenstream *ts);
+MIMIC_CORE_PUBLIC int ts_eof(cst_tokenstream *ts);
+MIMIC_CORE_PUBLIC const cst_string *ts_get(cst_tokenstream *ts);
 
 const cst_string *ts_get_quoted_token(cst_tokenstream *ts,
                                       char quote, char escape);

@@ -37,10 +37,11 @@
 /*  Vals, typed objects                                                  */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_VAL_H__
-#define _CST_VAL_H__
+#ifndef CST_VAL_H
+#define CST_VAL_H
 
 #include "mimic_core_config.h"
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_string.h"
 #include "cst_error.h"
@@ -99,27 +100,27 @@ typedef struct cst_val_def_struct {
 } cst_val_def;
 
 /* Constructor functions */
-cst_val *int_val(int i);
-cst_val *float_val(float f);
-cst_val *string_val(const char *s);
+MIMIC_CORE_PUBLIC cst_val *int_val(int i);
+MIMIC_CORE_PUBLIC cst_val *float_val(float f);
+MIMIC_CORE_PUBLIC cst_val *string_val(const char *s);
 cst_val *val_new_typed(int type, void *vv);
-cst_val *cons_val(const cst_val *a, const cst_val *b);
+MIMIC_CORE_PUBLIC cst_val *cons_val(const cst_val *a, const cst_val *b);
 
 /* Derefence and delete val if no other references */
-void delete_val(cst_val *val);
-void delete_val_list(cst_val *val);
+MIMIC_CORE_PUBLIC void delete_val(cst_val *val);
+MIMIC_CORE_PUBLIC void delete_val_list(cst_val *val);
 
 /* Accessor functions */
-int val_int(const cst_val *v);
-float val_float(const cst_val *v);
-const char *val_string(const cst_val *v);
-void *val_void(const cst_val *v);
-void *val_generic(const cst_val *v, int type, const char *stype);
-const cst_val *val_car(const cst_val *v);
-const cst_val *val_cdr(const cst_val *v);
+MIMIC_CORE_PUBLIC int val_int(const cst_val *v);
+MIMIC_CORE_PUBLIC float val_float(const cst_val *v);
+MIMIC_CORE_PUBLIC const char *val_string(const cst_val *v);
+MIMIC_CORE_PUBLIC void *val_void(const cst_val *v);
+MIMIC_CORE_PUBLIC void *val_generic(const cst_val *v, int type, const char *stype);
+MIMIC_CORE_PUBLIC const cst_val *val_car(const cst_val *v);
+MIMIC_CORE_PUBLIC const cst_val *val_cdr(const cst_val *v);
 
-const cst_val *set_cdr(cst_val *v1, const cst_val *v2);
-const cst_val *set_car(cst_val *v1, const cst_val *v2);
+MIMIC_CORE_PUBLIC const cst_val *set_cdr(cst_val *v1, const cst_val *v2);
+MIMIC_CORE_PUBLIC const cst_val *set_car(cst_val *v1, const cst_val *v2);
 
 int cst_val_consp(const cst_val *v);
 
@@ -144,19 +145,19 @@ int val_member_string(const char *a, const cst_val *b);
 int val_stringp(const cst_val *a);
 const cst_val *val_assoc_string(const char *v1, const cst_val *al);
 
-void val_print(cst_file fd, const cst_val *v);
-cst_val *val_readlist_string(const char *str);
+MIMIC_CORE_PUBLIC void val_print(cst_file fd, const cst_val *v);
+MIMIC_CORE_PUBLIC cst_val *val_readlist_string(const char *str);
 
-cst_val *val_reverse(cst_val *v);
-cst_val *val_append(cst_val *a, cst_val *b);
-int val_length(const cst_val *l);
-cst_val *cst_utf8_explode(const cst_string *utf8string);
+MIMIC_CORE_PUBLIC cst_val *val_reverse(cst_val *v);
+MIMIC_CORE_PUBLIC cst_val *val_append(cst_val *a, cst_val *b);
+MIMIC_CORE_PUBLIC int val_length(const cst_val *l);
+MIMIC_CORE_PUBLIC cst_val *cst_utf8_explode(const cst_string *utf8string);
 cst_string *cst_implode(const cst_val *string_list);
 
-cst_val *cst_utf8_ord(const cst_val *utf8_char);
+MIMIC_CORE_PUBLIC cst_val *cst_utf8_ord(const cst_val *utf8_char);
 cst_val *cst_utf8_chr(const cst_val *ord);
 
-int cst_utf8_ord_string(const char *utf8_char);
+MIMIC_CORE_PUBLIC int cst_utf8_ord_string(const char *utf8_char);
 
 /* make sure you know what you are doing before you call these */
 int val_dec_refcount(const cst_val *b);
@@ -167,5 +168,5 @@ extern const cst_val_def cst_val_defs[];
 
 /* Generic pointer vals */
 typedef void cst_userdata;
-CST_VAL_USER_TYPE_DCLS(userdata, cst_userdata);
+CST_VAL_USER_TYPE_DCLS_VISIB(userdata, cst_userdata, MIMIC_CORE_PUBLIC);
 #endif

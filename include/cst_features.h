@@ -37,9 +37,10 @@
 /*  feature-values lists                                                 */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_FEATURES_H__
-#define _CST_FEATURES_H__
+#ifndef CST_FEATURES_H
+#define CST_FEATURES_H
 
+#include "cst_lib_visibility.h"
 #include "cst_alloc.h"
 #include "cst_val.h"
 #include "cst_string.h"
@@ -60,44 +61,44 @@ typedef struct cst_features_struct {
 } cst_features;
 
 /* Constructor functions */
-cst_features *new_features(void);
+MIMIC_CORE_PUBLIC cst_features *new_features(void);
 cst_features *new_features_local(cst_alloc_context ctx);
-void delete_features(cst_features *f);
+MIMIC_CORE_PUBLIC void delete_features(cst_features *f);
 
 /* Accessor functions */
-int feat_int(const cst_features *f, const char *name);
-float feat_float(const cst_features *f, const char *name);
-const char *feat_string(const cst_features *f, const char *name);
-const cst_val *feat_val(const cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC int feat_int(const cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC float feat_float(const cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC const char *feat_string(const cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC const cst_val *feat_val(const cst_features *f, const char *name);
 
-int get_param_int(const cst_features *f, const char *name, int def);
-float get_param_float(const cst_features *f, const char *name, float def);
-const char *get_param_string(const cst_features *f, const char *name,
+MIMIC_CORE_PUBLIC int get_param_int(const cst_features *f, const char *name, int def);
+MIMIC_CORE_PUBLIC float get_param_float(const cst_features *f, const char *name, float def);
+MIMIC_CORE_PUBLIC const char *get_param_string(const cst_features *f, const char *name,
                              const char *def);
-const cst_val *get_param_val(const cst_features *f, const char *name,
+MIMIC_CORE_PUBLIC const cst_val *get_param_val(const cst_features *f, const char *name,
                              cst_val *def);
 
 /* Setting functions */
-void feat_set_int(cst_features *f, const char *name, int v);
-void feat_set_float(cst_features *f, const char *name, float v);
-void feat_set_string(cst_features *f, const char *name, const char *v);
-void feat_set(cst_features *f, const char *name, const cst_val *v);
+MIMIC_CORE_PUBLIC void feat_set_int(cst_features *f, const char *name, int v);
+MIMIC_CORE_PUBLIC void feat_set_float(cst_features *f, const char *name, float v);
+MIMIC_CORE_PUBLIC void feat_set_string(cst_features *f, const char *name, const char *v);
+MIMIC_CORE_PUBLIC void feat_set(cst_features *f, const char *name, const cst_val *v);
 
 int feat_remove(cst_features *f, const char *name);
-int feat_present(const cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC int feat_present(const cst_features *f, const char *name);
 int feat_length(const cst_features *f);
 
 /* Feature names are expected to be literals -- its *much* faster to do */
 /* look ups and less alloc/frees are necesssary.  Almosts always this is */
 /* fine, but when you are making up new fnames, you can get a copy of the */
 /* string that will be deleted when the cst_features is deleted */
-const char *feat_own_string(cst_features *f, const char *name);
+MIMIC_CORE_PUBLIC const char *feat_own_string(cst_features *f, const char *name);
 
-CST_VAL_USER_TYPE_DCLS(features, cst_features);
-int feat_copy_into(const cst_features *from, cst_features *to);
+CST_VAL_USER_TYPE_DCLS_VISIB(features, cst_features, MIMIC_CORE_PUBLIC);
+MIMIC_CORE_PUBLIC int feat_copy_into(const cst_features *from, cst_features *to);
 /* Link FROM into TO so FROM's features will be searched after TO's features */
 int feat_link_into(const cst_features *from, cst_features *to);
 /* For debugging */
-int cst_feat_print(cst_file fd, const cst_features *f);
+MIMIC_CORE_PUBLIC int cst_feat_print(cst_file fd, const cst_features *f);
 
 #endif

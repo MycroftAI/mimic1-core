@@ -37,9 +37,10 @@
 /*  Diphone databases                                                    */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_DIPHONE_H__
-#define _CST_DIPHONE_H__
+#ifndef CST_DIPHONE_H
+#define CST_DIPHONE_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_features.h"
@@ -64,8 +65,8 @@ struct cst_diphone_db_struct {
 };
 typedef struct cst_diphone_db_struct cst_diphone_db;
 
-CST_VAL_USER_TYPE_DCLS(diphone_db, cst_diphone_db);
-cst_utterance *diphone_synth(cst_utterance *utt);
+CST_VAL_USER_TYPE_DCLS_VISIB(diphone_db, cst_diphone_db, MIMIC_CORE_PUBLIC);
+MIMIC_CORE_PUBLIC cst_utterance *diphone_synth(cst_utterance *utt);
 cst_utterance *get_diphone_units(cst_utterance *utt);
 
 #endif

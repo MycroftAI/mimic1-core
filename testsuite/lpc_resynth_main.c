@@ -42,10 +42,8 @@
 #include "cst_wave.h"
 #include "cst_tokenstream.h"
 #include "cst_args.h"
+#include "cst_sigpr.h"
 #include <math.h>
-
-void lpc2ref(const float *lpc, float *rfc, int order);
-void ref2lpc(const float *rfc, float *lpc, int order);
 
 static double plus_or_minus_one()
 {

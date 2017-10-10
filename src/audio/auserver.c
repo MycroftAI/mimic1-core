@@ -41,6 +41,7 @@
 /*                                                                       */
 /*************************************************************************/
 #include "cst_audio.h"
+#include "cst_endian_internal.h"
 #include <stdlib.h>
 #include "cst_socket.h"
 #include "cst_string.h"

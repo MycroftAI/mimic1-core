@@ -39,6 +39,7 @@
 /*    yet load from files dumps with different endianness                */
 /*************************************************************************/
 
+#include "cst_endian_internal.h"
 #include "cst_file.h"
 #include "cst_cg.h"
 #include "cst_cart.h"

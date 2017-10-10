@@ -37,9 +37,10 @@
 /*  Short term signals                                                   */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_STS_H__
-#define _CST_STS_H__
+#ifndef CST_STS_H
+#define CST_STS_H
 
+#include "cst_lib_visibility.h"
 /* Need some lower level functions in case we are doing streaming */
 #include "cst_wave.h"
 #include "cst_audio.h"
@@ -115,11 +116,11 @@ struct cst_lpcres_struct {
 };
 typedef struct cst_lpcres_struct cst_lpcres;
 
-cst_lpcres *new_lpcres();
-void delete_lpcres(cst_lpcres *l);
+MIMIC_CORE_PUBLIC cst_lpcres *new_lpcres();
+MIMIC_CORE_PUBLIC void delete_lpcres(cst_lpcres *l);
 float lpcres_frame_shift(cst_lpcres *t, int frame);
-void lpcres_resize_frames(cst_lpcres *l, int num_frames);
-void lpcres_resize_samples(cst_lpcres *l, int num_samples);
+MIMIC_CORE_PUBLIC void lpcres_resize_frames(cst_lpcres *l, int num_frames);
+MIMIC_CORE_PUBLIC void lpcres_resize_samples(cst_lpcres *l, int num_samples);
 
 cst_sts_list *new_sts_list();
 void delete_sts_list(cst_sts_list *l);

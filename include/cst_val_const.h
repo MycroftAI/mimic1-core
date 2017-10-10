@@ -106,9 +106,10 @@
 /*                                                                       */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_VAL_CONSTS_H__
-#define _CST_VAL_CONSTS_H__
+#ifndef CST_VAL_CONSTS_H
+#define CST_VAL_CONSTS_H
 
+#include "cst_lib_visibility.h"
 #include "cst_val_defs.h"
 
 /* There is built-in int to string conversions here for numbers   */
@@ -151,8 +152,8 @@ extern const cst_val val_int_22;
 extern const cst_val val_int_23;
 extern const cst_val val_int_24;
 
-extern const cst_val val_string_0;
-extern const cst_val val_string_1;
+MIMIC_CORE_PUBLIC extern const cst_val val_string_0;
+MIMIC_CORE_PUBLIC extern const cst_val val_string_1;
 extern const cst_val val_string_2;
 extern const cst_val val_string_3;
 extern const cst_val val_string_4;
@@ -284,8 +285,8 @@ extern const cst_val_int val_int_22;
 extern const cst_val_int val_int_23;
 extern const cst_val_int val_int_24;
 
-extern const cst_val_void val_string_0;
-extern const cst_val_void val_string_1;
+MIMIC_CORE_PUBLIC extern const cst_val_void val_string_0;
+MIMIC_CORE_PUBLIC extern const cst_val_void val_string_1;
 extern const cst_val_void val_string_2;
 extern const cst_val_void val_string_3;
 extern const cst_val_void val_string_4;
@@ -347,7 +348,7 @@ extern const cst_val_void val_string_24;
 #define VAL_INT_23 (cst_val *)&val_int_23
 #define VAL_INT_24 (cst_val *)&val_int_24
 
-const cst_val *val_int_n(int n);
+MIMIC_CORE_PUBLIC const cst_val *val_int_n(int n);
 
 #define VAL_STRING_0 (cst_val *)&val_string_0
 #define VAL_STRING_1 (cst_val *)&val_string_1

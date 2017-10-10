@@ -47,6 +47,7 @@
 #define FLITE_HTS_ENGINE_H
 
 #include "mimic_core_config.h"
+#include "cst_lib_visibility.h"
 
 #ifdef __cplusplus
 #define FLITE_HTS_ENGINE_H_START extern "C" {
@@ -68,11 +69,11 @@ typedef struct _Flite_HTS_Engine {
 #include "cst_val.h"
 #include "cst_utterance.h"
 
-CST_VAL_USER_TYPE_DCLS(flitehtsengine, Flite_HTS_Engine);
+CST_VAL_USER_TYPE_DCLS_VISIB(flitehtsengine, Flite_HTS_Engine, MIMIC_CORE_PUBLIC);
 void delete_flitehtsengine(Flite_HTS_Engine * f);
 
 /* Flite_HTS_Engine_initialize: initialize system */
-void Flite_HTS_Engine_initialize(Flite_HTS_Engine * f);
+MIMIC_CORE_PUBLIC void Flite_HTS_Engine_initialize(Flite_HTS_Engine * f);
 
 /* Flite_HTS_Engine_load: load HTS voice */
 HTS_Boolean Flite_HTS_Engine_load(Flite_HTS_Engine * f, const char *fn);
@@ -118,13 +119,13 @@ HTS_Boolean Flite_HTS_Engine_synthesize(Flite_HTS_Engine * f, const char *txt,
 void Flite_HTS_Engine_clear(Flite_HTS_Engine * f);
 
 /* Flite_HTS_Engine_get_sampling_frequency: get sampling frequency from engine */
-size_t Flite_HTS_Engine_get_sampling_frequency(Flite_HTS_Engine * f);
+MIMIC_CORE_PUBLIC size_t Flite_HTS_Engine_get_sampling_frequency(Flite_HTS_Engine * f);
 
 /* Generate wave for utt */
-cst_utterance *hts_synth(cst_utterance *utt);
+MIMIC_CORE_PUBLIC cst_utterance *hts_synth(cst_utterance *utt);
 
 /* Find .htsvoice file path for voice v */
-char *mimic_hts_get_voice_file(const cst_voice *const v);
+MIMIC_CORE_PUBLIC char *mimic_hts_get_voice_file(const cst_voice *const v);
 
 FLITE_HTS_ENGINE_H_END;
 

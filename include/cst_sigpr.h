@@ -37,16 +37,21 @@
 /*  Signal processing                                                    */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_SIGPR_H__
-#define _CST_SIGPR_H__
+#ifndef CST_SIGPR_H
+#define CST_SIGPR_H
 
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_val.h"
 #include "cst_sts.h"
 
-cst_wave *lpc_resynth(cst_lpcres *lpcres);
+MIMIC_CORE_PUBLIC cst_wave *lpc_resynth(cst_lpcres *lpcres);
 cst_wave *lpc_resynth_fixedpoint(cst_lpcres *lpcres);
 cst_wave *lpc_resynth_spike(cst_lpcres *lpcres);
+
+MIMIC_CORE_PUBLIC void lpc2ref(const float *lpc, float *rfc, int order);
+MIMIC_CORE_PUBLIC void ref2lpc(const float *rfc, float *lpc, int order);
+
 
 void add_residual_windowed(int targ_size,
                            unsigned char *targ_residual,

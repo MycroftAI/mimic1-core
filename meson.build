@@ -4,6 +4,12 @@ mimic_core_deps = []
 c_compiler = meson.get_compiler('c')
 host_system = host_machine.system()
 
+have_visibility_hidden = c_compiler.has_argument('-fvisibility=hidden')
+if have_visibility_hidden
+  add_project_arguments('-fvisibility=hidden', language: 'c')
+endif
+
+
 conf_data = configuration_data()
 
 pkgdatadir = join_paths(get_option('prefix'), get_option('datadir'), 'ttsmimic')
@@ -337,6 +343,7 @@ includes += include_directories('include')
 ttsmimiccore = library('ttsmimiccore', sources,
                       include_directories : includes,
                       dependencies: mimic_core_deps,
+                      c_args: ['-DCOMPILE_LIB_MIMIC_CORE'],
                       install: true)
 
 # Do not rename the ttsmimic_core_dep variable, as it is used by dependencies
@@ -346,7 +353,7 @@ ttsmimic_core_dep = declare_dependency(link_with : ttsmimiccore,
 
 ############ Headers #################
 
-ttsmimic_headers = [
+ttsmimic_public_headers = [
   'include/cst_alloc.h',
   'include/cst_args.h',
   'include/cst_audio.h',
@@ -354,7 +361,6 @@ ttsmimic_headers = [
   'include/cst_cg.h',
   'include/cst_clunits.h',
   'include/cst_diphone.h',
-  'include/cst_endian.h',
   'include/cst_error.h',
   'include/cst_features.h',
   'include/cst_ffeatures.h',
@@ -390,7 +396,7 @@ ttsmimic_headers = [
   'include/flite_hts_engine.h',
   'include/mimic.h']
 
-install_headers(ttsmimic_headers, subdir : 'ttsmimic')
+install_headers(ttsmimic_public_headers, subdir : 'ttsmimic')
 
 ########## Man pages ##############
 
@@ -414,29 +420,36 @@ pkg.generate(libraries : ttsmimiccore,
 
 mimicbin = executable('mimic', 'main/mimic_main.c', 
                       dependencies: ttsmimic_core_dep,
+                      c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                       install: true)
 
 mimicvox_info = executable('mimicvox_info', 'main/mimicvox_info_main.c',
                            dependencies: ttsmimic_core_dep,
+                           c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                            install: true)
 
 t2pbin = executable('t2p', 'main/t2p_main.c', 
                       dependencies: ttsmimic_core_dep,
+                      c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                       install: true)
 
 compile_regexes = executable('compile_regexes', 'main/compile_regexes.c',
                            dependencies: ttsmimic_core_dep,
+                           c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                            install: true)
 
 ########## Unit tests #########################
 unit_tests =  [
-  ['hrg', []],
-  ['regex', []],
-  ['string', []],
-  ['token', ['-DTEST_FILE="' + join_paths(meson.current_source_dir(), 'unittests', 'data.one') + '"',
+  ['hrg', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['regex', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['string', ['-DCOMPILE_EXE_MIMIC_CORE']],
+  ['token', ['-DCOMPILE_EXE_MIMIC_CORE',
+             '-DTEST_FILE="' + join_paths(meson.current_source_dir(), 'unittests', 'data.one') + '"',
                   '-DTEST_FILE_UTF8="' + join_paths(meson.current_source_dir(), 'unittests', 'data_utf8.txt') + '"']],
-  ['wave', ['-DA_WAV1="' + join_paths(meson.current_source_dir(), 'unittests', 'hello_world.wav') + '"',
+  ['wave', ['-DCOMPILE_EXE_MIMIC_CORE',
+            '-DA_WAV1="' + join_paths(meson.current_source_dir(), 'unittests', 'hello_world.wav') + '"',
             '-DA_WAV2="' + join_paths(meson.current_source_dir(), 'unittests', 'hi_again.wav') + '"']],
+  ['include_public_headers', []]
   ]
 
 foreach test_name_args : unit_tests
@@ -461,6 +474,7 @@ command_line_tools = [
 foreach test_name : command_line_tools
    test_bin = executable(test_name, join_paths('testsuite', test_name + '_main.c'),
                          include_directories : includes,
+                         c_args: ['-DCOMPILE_EXE_MIMIC_CORE'],
                          dependencies: [ttsmimic_core_dep, m_dep])
    #test(test_name, test_bin)
 endforeach

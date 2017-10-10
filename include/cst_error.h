@@ -37,9 +37,10 @@
 /*  Error handler                                                        */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_ERROR_H__
-#define _CST_ERROR_H__
+#ifndef CST_ERROR_H
+#define CST_ERROR_H
 
+#include "cst_lib_visibility.h"
 #include <stdlib.h>
 
 #ifdef DIE_ON_ERROR
@@ -50,7 +51,7 @@ extern jmp_buf *cst_errjmp;
 #define cst_error() (cst_errjmp ? longjmp(*cst_errjmp,1) : exit(-1))
 #endif
 
-int cst_errmsg(const char *fmt, ...);
+MIMIC_CORE_PUBLIC int cst_errmsg(const char *fmt, ...);
 #define cst_dbgmsg cst_errmsg
 
 /* Need macros to help set catches */

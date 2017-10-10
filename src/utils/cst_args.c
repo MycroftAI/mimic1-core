@@ -37,8 +37,9 @@
 /*  Argument/usage command parser (like that in EST)                     */
 /*                                                                       */
 /*************************************************************************/
-#include "cst_tokenstream.h"
+#include "cst_args.h"
 #include "cst_features.h"
+#include "cst_tokenstream.h"
 
 static void parse_description(const char *description, cst_features *f);
 static void parse_usage(const char *progname,

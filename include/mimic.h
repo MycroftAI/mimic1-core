@@ -45,6 +45,7 @@ extern "C" {
 #endif                          /* __cplusplus */
 
 #include "mimic_core_config.h"
+#include "cst_lib_visibility.h"
 #include "cst_string.h"
 #include "cst_regex.h"
 #include "cst_val.h"
@@ -67,32 +68,33 @@ extern "C" {
 #include "cst_tokenstream.h"
 #include "cst_plugins.h"
 
-extern cst_val *mimic_voice_list;
+MIMIC_CORE_PUBLIC extern cst_val *mimic_voice_list;
 extern cst_lang mimic_lang_list[20];
 
 /* Public functions */
-    int mimic_core_init();
-    int mimic_core_exit();
+MIMIC_CORE_PUBLIC int mimic_core_init();
+MIMIC_CORE_PUBLIC int mimic_core_exit();
 
 /* General top level functions */
-    cst_voice *mimic_voice_select(const char *name);
-    cst_voice *mimic_voice_load(const char *voice_filename);
-    int mimic_voice_dump(cst_voice *voice, const char *voice_filename);
-    int mimic_file_to_speech(const char *filename, cst_voice *voice,
+MIMIC_CORE_PUBLIC const cst_lang *mimic_lang_select(const char *lang);
+MIMIC_CORE_PUBLIC cst_voice *mimic_voice_select(const char *name);
+MIMIC_CORE_PUBLIC cst_voice *mimic_voice_load(const char *voice_filename);
+MIMIC_CORE_PUBLIC int mimic_voice_dump(cst_voice *voice, const char *voice_filename);
+MIMIC_CORE_PUBLIC int mimic_file_to_speech(const char *filename, cst_voice *voice,
                              const char *outtype, float *dur);
-    int mimic_text_to_speech(const char *text, cst_voice *voice,
+MIMIC_CORE_PUBLIC int mimic_text_to_speech(const char *text, cst_voice *voice,
                              const char *outtype, float *dur);
-    int mimic_phones_to_speech(const char *text, cst_voice *voice,
+MIMIC_CORE_PUBLIC int mimic_phones_to_speech(const char *text, cst_voice *voice,
                                const char *outtype, float *dur);
-    int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
+MIMIC_CORE_PUBLIC int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
                                     const char *outtype, float *dur);
-    int mimic_ssml_text_to_speech(const char *text, cst_voice *voice,
+MIMIC_CORE_PUBLIC int mimic_ssml_text_to_speech(const char *text, cst_voice *voice,
                                     const char *outtype, float *dur);
-    int mimic_voice_add_lex_addenda(cst_voice *v, const cst_string *lexfile);
+MIMIC_CORE_PUBLIC int mimic_voice_add_lex_addenda(cst_voice *v, const cst_string *lexfile);
 
 /* Lower lever user functions */
     cst_wave *mimic_text_to_wave(const char *text, cst_voice *voice);
-    cst_utterance *mimic_synth_text(const char *text, cst_voice *voice);
+    MIMIC_CORE_PUBLIC cst_utterance *mimic_synth_text(const char *text, cst_voice *voice);
     cst_utterance *mimic_synth_phones(const char *phones, cst_voice *voice);
 
     int mimic_ts_to_speech(cst_tokenstream *ts, cst_voice *voice,
@@ -107,22 +109,22 @@ extern cst_lang mimic_lang_list[20];
     int mimic_munmap_clunit_voxdata(cst_voice *voice);
 
 /* mimic public export wrappers for features access */
-    int mimic_get_param_int(const cst_features *f, const char *name, int def);
-    float mimic_get_param_float(const cst_features *f, const char *name,
+    MIMIC_CORE_PUBLIC int mimic_get_param_int(const cst_features *f, const char *name, int def);
+    MIMIC_CORE_PUBLIC float mimic_get_param_float(const cst_features *f, const char *name,
                                 float def);
-    const char *mimic_get_param_string(const cst_features *f,
+    MIMIC_CORE_PUBLIC const char *mimic_get_param_string(const cst_features *f,
                                        const char *name, const char *def);
-    const cst_val *mimic_get_param_val(const cst_features *f,
+    MIMIC_CORE_PUBLIC const cst_val *mimic_get_param_val(const cst_features *f,
                                        const char *name, cst_val *def);
-    void mimic_feat_set_int(cst_features *f, const char *name, int v);
-    void mimic_feat_set_float(cst_features *f, const char *name, float v);
-    void mimic_feat_set_string(cst_features *f, const char *name,
+    MIMIC_CORE_PUBLIC void mimic_feat_set_int(cst_features *f, const char *name, int v);
+    MIMIC_CORE_PUBLIC void mimic_feat_set_float(cst_features *f, const char *name, float v);
+    MIMIC_CORE_PUBLIC void mimic_feat_set_string(cst_features *f, const char *name,
                                const char *v);
-    void mimic_feat_set(cst_features *f, const char *name, const cst_val *v);
-    int mimic_feat_remove(cst_features *f, const char *name);
+    MIMIC_CORE_PUBLIC void mimic_feat_set(cst_features *f, const char *name, const cst_val *v);
+    MIMIC_CORE_PUBLIC int mimic_feat_remove(cst_features *f, const char *name);
 
-    const char *mimic_ffeature_string(const cst_item *item,
-                                      const char *featpath);
+    MIMIC_CORE_PUBLIC const char *mimic_ffeature_string(const cst_item *item,
+                                                        const char *featpath);
     int mimic_ffeature_int(const cst_item *item, const char *featpath);
     float mimic_ffeature_float(const cst_item *item, const char *featpath);
     const cst_val *mimic_ffeature(const cst_item *item, const char *featpath);
@@ -130,8 +132,8 @@ extern cst_lang mimic_lang_list[20];
 
 /* These functions are *not* thread-safe, they are designed to be called */
 /* before the initial synthesis occurs */
-    int mimic_add_voice(cst_voice *voice);
-    int mimic_add_lang(const char *langname,
+    MIMIC_CORE_PUBLIC int mimic_add_voice(cst_voice *voice);
+    MIMIC_CORE_PUBLIC int mimic_add_lang(const char *langname,
                        void (*lang_init) (cst_voice *vox),
                        cst_lexicon *(*lex_init) ());
 /* These are init functions for generic grapheme based voices */

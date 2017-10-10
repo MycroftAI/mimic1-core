@@ -40,7 +40,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include "cst_alloc.h"
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 
 const int32_t cst_endian_loc = 1;
 

@@ -37,13 +37,14 @@
 /*  Waveforms                                                            */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_WAVE_H__
-#define _CST_WAVE_H__
+#ifndef CST_WAVE_H
+#define CST_WAVE_H
 
+#include <stdint.h>
+#include "cst_lib_visibility.h"
 #include "cst_file.h"
 #include "cst_error.h"
 #include "cst_alloc.h"
-#include "cst_endian.h"
 #include "cst_val.h"
 
 typedef struct cst_wave_struct {
@@ -63,10 +64,10 @@ typedef struct cst_wave_header_struct {
     int32_t num_channels;
 } cst_wave_header;
 
-cst_wave *new_wave();
-cst_wave *copy_wave(const cst_wave *w);
-void delete_wave(cst_wave *val);
-int concat_wave(cst_wave *dest, const cst_wave *src);
+MIMIC_CORE_PUBLIC cst_wave *new_wave();
+MIMIC_CORE_PUBLIC cst_wave *copy_wave(const cst_wave *w);
+MIMIC_CORE_PUBLIC void delete_wave(cst_wave *val);
+MIMIC_CORE_PUBLIC int concat_wave(cst_wave *dest, const cst_wave *src);
 
 #define cst_wave_num_samples(w) (w?w->num_samples:0)
 #define cst_wave_num_channels(w) (w?w->num_channels:0)
@@ -77,9 +78,9 @@ int concat_wave(cst_wave *dest, const cst_wave *src);
 #define cst_wave_set_num_channels(w,s) w->num_channels=s
 #define cst_wave_set_sample_rate(w,s) w->sample_rate=s
 
-int cst_wave_save(cst_wave *w, const char *filename, const char *type);
-int cst_wave_save_riff(cst_wave *w, const char *filename);
-int cst_wave_save_raw(cst_wave *w, const char *filename);
+MIMIC_CORE_PUBLIC int cst_wave_save(cst_wave *w, const char *filename, const char *type);
+MIMIC_CORE_PUBLIC int cst_wave_save_riff(cst_wave *w, const char *filename);
+MIMIC_CORE_PUBLIC int cst_wave_save_raw(cst_wave *w, const char *filename);
 int cst_wave_append_riff(cst_wave *w, const char *filename);
 
 extern const char* cst_wave_fmt_riff;
@@ -88,9 +89,9 @@ extern const char* cst_wave_fmt_raw;
 int cst_wave_save_riff_fd(cst_wave *w, cst_file fd);
 int cst_wave_save_raw_fd(cst_wave *w, cst_file fd);
 
-int cst_wave_load(cst_wave *w, const char *filename, const char *type);
-int cst_wave_load_riff(cst_wave *w, const char *filename);
-int cst_wave_load_raw(cst_wave *w, const char *filename,
+MIMIC_CORE_PUBLIC int cst_wave_load(cst_wave *w, const char *filename, const char *type);
+MIMIC_CORE_PUBLIC int cst_wave_load_riff(cst_wave *w, const char *filename);
+MIMIC_CORE_PUBLIC int cst_wave_load_raw(cst_wave *w, const char *filename,
                       const char *bo, int sample_rate);
 
 int cst_wave_load_riff_header(cst_wave_header *header, cst_file fd);
@@ -98,9 +99,9 @@ int cst_wave_load_riff_fd(cst_wave *w, cst_file fd);
 int cst_wave_load_raw_fd(cst_wave *w, cst_file fd,
                          const char *bo, int sample_rate);
 
-int cst_wave_resize(cst_wave *w, int samples, int num_channels);
-void cst_wave_resample(cst_wave *w, int sample_rate);
-void cst_wave_rescale(cst_wave *w, int factor);
+MIMIC_CORE_PUBLIC int cst_wave_resize(cst_wave *w, int samples, int num_channels);
+MIMIC_CORE_PUBLIC void cst_wave_resample(cst_wave *w, int sample_rate);
+MIMIC_CORE_PUBLIC void cst_wave_rescale(cst_wave *w, int factor);
 
 /* Resampling code */
 typedef struct cst_rateconv_struct {
@@ -152,8 +153,8 @@ typedef struct {
 #define CST_SND_SHORT 3
 
 /* Convertion functions */
-unsigned char cst_short_to_ulaw(int16_t sample);
-int16_t cst_ulaw_to_short(unsigned char ulawbyte);
+MIMIC_CORE_PUBLIC unsigned char cst_short_to_ulaw(int16_t sample);
+MIMIC_CORE_PUBLIC int16_t cst_ulaw_to_short(unsigned char ulawbyte);
 
 #define CST_G721_LEADIN 8
 unsigned char *cst_g721_decode(int *actual_size, int size,

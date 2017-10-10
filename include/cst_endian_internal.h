@@ -38,13 +38,15 @@
 /*                                                                       */
 /*************************************************************************/
 
-#include <stdint.h>
+#ifndef CST_ENDIAN_H
+#define CST_ENDIAN_H
 
-#ifndef __CST_ENDIAN_H__
-#define __CST_ENDIAN_H__
+#include <stdint.h>
+#include <stdlib.h>
+#include "cst_lib_visibility.h"
 
 /* This gets set to 1 and we test where the on bit is to determine byteorder */
-extern const int32_t cst_endian_loc;
+MIMIC_CORE_PRIVATE extern const int32_t cst_endian_loc;
 /* Sun, HP, SGI Mips, M68000, PowerPC */
 #define CST_BIG_ENDIAN (((char *)&cst_endian_loc)[0] == 0)
 /* Intel, Alpha, DEC Mips, Vax, ARM, Other MIPS (Casio, Ben Nanonote etc) */
@@ -62,9 +64,10 @@ extern const int32_t cst_endian_loc;
 #define SWAPINT16(x) ((((uint16_t)x) & 0xff) << 8 | \
         (((uint16_t)x) & 0xff00) >> 8)
 
-void swap_bytes_short(int16_t *b, size_t n);
+MIMIC_CORE_PRIVATE void swap_bytes_short(int16_t *b, size_t n);
 
-void swapdouble(double *d);
-void swapfloat(float *f);
+MIMIC_CORE_PROTECTED void swapdouble(double *d);
+MIMIC_CORE_PROTECTED void swapfloat(float *f);
 
-#endif
+#endif /* Header guard */
+

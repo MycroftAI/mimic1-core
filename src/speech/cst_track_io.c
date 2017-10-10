@@ -38,7 +38,7 @@
 /*                                                                       */
 /*************************************************************************/
 #include "cst_string.h"
-#include "cst_endian.h"
+#include "cst_endian_internal.h"
 #include "cst_tokenstream.h"
 #include "cst_track.h"
 

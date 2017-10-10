@@ -28,10 +28,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
  */
-#ifndef CST_UREGEX_H__
-#define CST_UREGEX_H__
+#ifndef CST_UREGEX_H
+#define CST_UREGEX_H
 
 #include "mimic_core_config.h"
+#include "cst_lib_visibility.h"
 #include <stdint.h>
 #include <cst_string.h>
 
@@ -39,10 +40,10 @@
 #include <pcre2.h>
 
 typedef pcre2_code cst_uregex;
-cst_string *cst_toupper_utf8(const cst_string *in);
-cst_string *cst_tolower_utf8(const cst_string *in);
-cst_uregex *new_cst_uregex(cst_string *pattern, uint32_t options);
-void delete_cst_uregex(cst_uregex *uregex);
-int cst_uregex_match(cst_uregex *uregex, const cst_string *str);
+MIMIC_CORE_PUBLIC cst_string *cst_toupper_utf8(const cst_string *in);
+MIMIC_CORE_PUBLIC cst_string *cst_tolower_utf8(const cst_string *in);
+MIMIC_CORE_PUBLIC cst_uregex *new_cst_uregex(cst_string *pattern, uint32_t options);
+MIMIC_CORE_PUBLIC void delete_cst_uregex(cst_uregex *uregex);
+MIMIC_CORE_PUBLIC int cst_uregex_match(cst_uregex *uregex, const cst_string *str);
 
 #endif

@@ -37,9 +37,10 @@
 /*  Lexicon related functions                                            */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_LEXICON_H__
-#define _CST_LEXICON_H__
+#ifndef CST_LEXICON_H
+#define CST_LEXICON_H
 
+#include "cst_lib_visibility.h"
 #include "cst_item.h"
 #include "cst_lts.h"
 
@@ -79,10 +80,10 @@ void delete_lexicon(cst_lexicon *lex);
 cst_val *cst_lex_make_entry(const cst_lexicon *lex, const cst_string *entry);
 cst_val *cst_lex_load_addenda(const cst_lexicon *lex, const char *lexfile);
 
-cst_val *lex_lookup(const cst_lexicon *l, const char *word,
+MIMIC_CORE_PUBLIC cst_val *lex_lookup(const cst_lexicon *l, const char *word,
                     const char *pos, const cst_features *feats);
-int in_lex(const cst_lexicon *l, const char *word, const char *pos,
+MIMIC_CORE_PUBLIC int in_lex(const cst_lexicon *l, const char *word, const char *pos,
            const cst_features *feats);
 
-CST_VAL_USER_TYPE_DCLS(lexicon, cst_lexicon);
+CST_VAL_USER_TYPE_DCLS_VISIB(lexicon, cst_lexicon, MIMIC_CORE_PUBLIC);
 #endif
