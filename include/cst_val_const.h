@@ -192,7 +192,7 @@ extern const cst_val val_string_24;
 /* problems if you need to use these in any code you are using, you are */
 /* unquestionably doing the wrong thing                                 */
 typedef struct cst_val_atom_struct_float {
-#ifdef CST_BIG_ENDIAN
+#if defined(WORDS_BIGENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t ref_count;            /* order is here important */
     int32_t type;
@@ -202,7 +202,7 @@ typedef struct cst_val_atom_struct_float {
  #else
    #error "Unknown bit size"
  #endif
-#else
+#elif defined(WORDS_LITTLEENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t type;                   /* order is here important */
     int32_t ref_count;
@@ -212,6 +212,8 @@ typedef struct cst_val_atom_struct_float {
  #else
   #error "Unknown CPU bit size"
  #endif
+#else /* No endianness defined*/
+ #error "Unknown CPU endianness"
 #endif
 #if MIMIC_CPU_BITS == 64
     double fval;
@@ -223,7 +225,7 @@ typedef struct cst_val_atom_struct_float {
 } cst_val_float;
 
 typedef struct cst_val_atom_struct_int {
-#ifdef CST_BIG_ENDIAN
+#if defined(WORDS_BIGENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t ref_count;            /* order is here important */
     int32_t type;
@@ -233,7 +235,7 @@ typedef struct cst_val_atom_struct_int {
  #else
    #error "Unknown CPU bit size"
  #endif
-#else
+#elif defined(WORDS_LITTLEENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t type;                   /* order is here important */
     int32_t ref_count;
@@ -243,6 +245,8 @@ typedef struct cst_val_atom_struct_int {
  #else
   #error "Unknown CPU bit size"
  #endif
+#else /* No endianness */
+ #error "Unknown CPU endianness"
 #endif
 #if MIMIC_CPU_BITS == 64
     int64_t ival;
@@ -254,7 +258,7 @@ typedef struct cst_val_atom_struct_int {
 } cst_val_int;
 
 typedef struct cst_val_atom_struct_void {
-#ifdef CST_BIG_ENDIAN
+#if defined(WORDS_BIGENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t ref_count;            /* order is here important */
     int32_t type;
@@ -262,9 +266,9 @@ typedef struct cst_val_atom_struct_void {
     int16_t ref_count;
     int16_t type;                 /* order is here important */
  #else
-   #error "Unknown bit size"
+   #error "Unknown CPU bit size"
  #endif
-#else
+#elif defined(WORDS_LITTLEENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t type;                   /* order is here important */
     int32_t ref_count;
@@ -272,8 +276,10 @@ typedef struct cst_val_atom_struct_void {
     int16_t type;                 /* order is here important */
     int16_t ref_count;
  #else
-  #error "Unknown bit size"
+  #error "Unknown CPU bit size"
  #endif
+#else
+ #error "Unknown CPU endianness"
 #endif
     void *vval;
 } cst_val_void;

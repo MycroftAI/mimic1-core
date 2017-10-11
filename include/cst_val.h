@@ -72,7 +72,7 @@ typedef struct cst_val_cons_struct {
  "order here is important" comments exist.
  */
 typedef struct cst_val_atom_struct {
-#ifdef CST_BIG_ENDIAN
+#if defined(WORDS_BIGENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t ref_count;            /* order is here important */
     int32_t type;
@@ -82,7 +82,7 @@ typedef struct cst_val_atom_struct {
  #else
    #error "Unknown CPU bit size"
  #endif
-#else
+#elif defined(WORDS_LITTLEENDIAN)
  #if MIMIC_CPU_BITS == 64
     int32_t type;                   /* order is here important */
     int32_t ref_count;
@@ -92,6 +92,8 @@ typedef struct cst_val_atom_struct {
  #else
   #error "Unknown CPU bit size"
  #endif
+#else
+ #error "Unknown CPU endianness"
 #endif
     union {
 #if MIMIC_CPU_BITS == 64

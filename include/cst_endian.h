@@ -42,17 +42,6 @@
 #define CST_ENDIAN_H
 
 #include <inttypes.h>
-#include <stdlib.h>
-#include "cst_lib_visibility.h"
-
-/* This gets set to 1 and we test where the on bit is to determine byteorder */
-MIMIC_CORE_PUBLIC extern const int32_t cst_endian_loc;
-/* Sun, HP, SGI Mips, M68000, PowerPC */
-#define CST_BIG_ENDIAN (((char *)&cst_endian_loc)[0] == 0)
-/* Intel, Alpha, DEC Mips, Vax, ARM, Other MIPS (Casio, Ben Nanonote etc) */
-#define CST_LITTLE_ENDIAN (((char *)&cst_endian_loc)[0] != 0)
-/* Perq (from Three Rivers) has a third byte order -- but we have no support */
-
 
 #ifndef UINTPTR_MAX
 #error "Cannot determine pointer size"

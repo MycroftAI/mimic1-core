@@ -46,6 +46,14 @@
 #include "cst_lib_visibility.h"
 #include "cst_endian.h"
 
+/* This gets set to 1 and we test where the on bit is to determine byteorder */
+MIMIC_CORE_PRIVATE extern const int32_t cst_endian_loc;
+/* Sun, HP, SGI Mips, M68000, PowerPC */
+#define CST_BIG_ENDIAN (((char *)&cst_endian_loc)[0] == 0)
+/* Intel, Alpha, DEC Mips, Vax, ARM, Other MIPS (Casio, Ben Nanonote etc) */
+#define CST_LITTLE_ENDIAN (((char *)&cst_endian_loc)[0] != 0)
+/* Perq (from Three Rivers) has a third byte order -- but we have no support */
+
 /* EST byte order strings */
 #define BYTE_ORDER_BIG "10"
 #define BYTE_ORDER_LITTLE "01"
