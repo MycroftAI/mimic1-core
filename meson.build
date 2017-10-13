@@ -34,6 +34,14 @@ else
   conf_data.set('MMAP_TYPE', mmap_type_none)
 endif
 
+if host_machine.endian() == 'big'
+  conf_data.set('WORDS_BIGENDIAN', 1)
+elif host_machine.endian() == 'little'
+  conf_data.set('WORDS_LITTLEENDIAN', 1)
+else
+  error('Unknown CPU endianness')
+endif
+
 
 check_headers = [
   ['HAVE_SYS_SOCKET_H', 'sys/socket.h']
@@ -361,6 +369,7 @@ ttsmimic_public_headers = [
   'include/cst_cg.h',
   'include/cst_clunits.h',
   'include/cst_diphone.h',
+  'include/cst_endian.h',
   'include/cst_error.h',
   'include/cst_features.h',
   'include/cst_ffeatures.h',

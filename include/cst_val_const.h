@@ -111,6 +111,7 @@
 
 #include "cst_lib_visibility.h"
 #include "cst_val_defs.h"
+#include "cst_endian.h"
 
 /* There is built-in int to string conversions here for numbers   */
 /* up to 20, note if you make this bigger you have to hand change */
@@ -191,62 +192,99 @@ extern const cst_val val_string_24;
 /* problems if you need to use these in any code you are using, you are */
 /* unquestionably doing the wrong thing                                 */
 typedef struct cst_val_atom_struct_float {
-#ifdef WORDS_BIGENDIAN
-    short ref_count;
-    short type;                 /* order is here important */
-#else
-#if (defined(__x86_64__) || defined(_M_X64))
-    int type;                   /* order is here important */
-    int ref_count;
-#else
-    short type;                 /* order is here important */
-    short ref_count;
+#if defined(WORDS_BIGENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t ref_count;            /* order is here important */
+    int32_t type;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t ref_count;
+    int16_t type;                 /* order is here important */
+ #else
+   #error "Unknown bit size"
+ #endif
+#elif defined(WORDS_LITTLEENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t type;                   /* order is here important */
+    int32_t ref_count;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t type;                 /* order is here important */
+    int16_t ref_count;
+ #else
+  #error "Unknown CPU bit size"
+ #endif
+#else /* No endianness defined*/
+ #error "Unknown CPU endianness"
 #endif
-#endif
-#if (defined(__x86_64__) || defined(_M_X64))
+#if MIMIC_CPU_BITS == 64
     double fval;
-#else
+#elif MIMIC_CPU_BITS == 32
     float fval;
+#else
+ #error "Unknown CPU bit size"
 #endif
 } cst_val_float;
 
 typedef struct cst_val_atom_struct_int {
-#ifdef WORDS_BIGENDIAN
-    short ref_count;
-    short type;                 /* order is here important (and unintuitive) */
-#else
-#if (defined(__x86_64__) || defined(_M_X64))
-    int type;                   /* order is here important */
-    int ref_count;
-#else
-    short type;                 /* order is here important */
-    short ref_count;
+#if defined(WORDS_BIGENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t ref_count;            /* order is here important */
+    int32_t type;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t ref_count;
+    int16_t type;                 /* order is here important */
+ #else
+   #error "Unknown CPU bit size"
+ #endif
+#elif defined(WORDS_LITTLEENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t type;                   /* order is here important */
+    int32_t ref_count;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t type;                 /* order is here important */
+    int16_t ref_count;
+ #else
+  #error "Unknown CPU bit size"
+ #endif
+#else /* No endianness */
+ #error "Unknown CPU endianness"
 #endif
-#endif
-#if (defined(__x86_64__) || defined(_M_X64))
-    long long ival;
+#if MIMIC_CPU_BITS == 64
+    int64_t ival;
+#elif MIMIC_CPU_BITS == 32
+    int32_t ival;
 #else
-    int ival;
+ #error "Unknown CPU bit size"
 #endif
 } cst_val_int;
 
 typedef struct cst_val_atom_struct_void {
-#ifdef WORDS_BIGENDIAN
-    short ref_count;
-    short type;                 /* order is here important */
+#if defined(WORDS_BIGENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t ref_count;            /* order is here important */
+    int32_t type;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t ref_count;
+    int16_t type;                 /* order is here important */
+ #else
+   #error "Unknown CPU bit size"
+ #endif
+#elif defined(WORDS_LITTLEENDIAN)
+ #if MIMIC_CPU_BITS == 64
+    int32_t type;                   /* order is here important */
+    int32_t ref_count;
+ #elif MIMIC_CPU_BITS == 32
+    int16_t type;                 /* order is here important */
+    int16_t ref_count;
+ #else
+  #error "Unknown CPU bit size"
+ #endif
 #else
-#if (defined(__x86_64__) || defined(_M_X64))
-    int type;                   /* order is here important */
-    int ref_count;
-#else
-    short type;                 /* order is here important */
-    short ref_count;
-#endif
+ #error "Unknown CPU endianness"
 #endif
     void *vval;
 } cst_val_void;
 
-#ifdef WORDS_BIGENDIAN
+#ifdef CST_BIG_ENDIAN
 #define DEF_CONST_VAL_INT(N,V) const cst_val_int N={-1, CST_VAL_TYPE_INT, V}
 #define DEF_CONST_VAL_STRING(N,S) const cst_val_void N={-1,CST_VAL_TYPE_STRING,(void *)S}
 #define DEF_CONST_VAL_FLOAT(N,F) const cst_val_float N={-1,CST_VAL_TYPE_FLOAT,(float)F}

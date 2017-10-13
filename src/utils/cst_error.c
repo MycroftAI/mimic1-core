@@ -37,11 +37,11 @@
 /*   Error mechanism                                                     */
 /*                                                                       */
 /*************************************************************************/
+#include <setjmp.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include "cst_file.h"
 #include "cst_error.h"
-
 jmp_buf *cst_errjmp = 0;
 
 int cst_errmsg(const char *fmt, ...)
