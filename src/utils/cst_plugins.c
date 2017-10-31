@@ -41,9 +41,9 @@
 #include "cst_error.h"
 #include "cst_string.h"
 #include "cst_plugins.h"
+#include "mimic.h"
 #include <string.h>
 #include <stdio.h>
-mimic_plugin_handler_t** mimic_plugins;
 
 #ifndef MIMIC_PLUGIN_DIR
 #error Missing MIMIC_PLUGIN_DIR definition
@@ -70,7 +70,7 @@ const char* mimic_get_plugin_dir()
     /* POSIX compliant */
     #include <dlfcn.h>
     #include <dirent.h>
-    mimic_plugin_handler_t* mimic_plugin_load(const char *filename)
+    mimic_plugin_handler_t* mimic_plugin_load(mimic_context *ctx, const char *filename)
     {
         void    *handle;
         mimic_plugin_handler_t *plug_hdl = NULL;
@@ -97,12 +97,12 @@ const char* mimic_get_plugin_dir()
         }
         plug_hdl->handle = handle;
         plug_hdl->plugin = plugin;
-        plugin->mimic_init();
+        plugin->mimic_init(ctx);
         return plug_hdl;
     }
-    int mimic_plugin_unload(mimic_plugin_handler_t *plug_hdl)
+    int mimic_plugin_unload(mimic_context *ctx, mimic_plugin_handler_t *plug_hdl)
     {
-        plug_hdl->plugin->mimic_exit();
+        plug_hdl->plugin->mimic_exit(ctx);
         dlclose(plug_hdl->handle);
         cst_free(plug_hdl);
         return 0;
@@ -183,7 +183,7 @@ const char* mimic_get_plugin_dir()
     #include <windows.h>
     /* Microsoft Windows (64-bit) */
     /* Microsoft Windows (32-bit) */
-    mimic_plugin_handler_t* mimic_plugin_load(const char *filename)
+    mimic_plugin_handler_t* mimic_plugin_load(mimic_context *ctx, const char *filename)
     {
         mimic_plugin_handler_t *plug_hdl = NULL;
         HINSTANCE handle = NULL;
@@ -207,12 +207,12 @@ const char* mimic_get_plugin_dir()
         }
         plug_hdl->handle = handle;
         plug_hdl->plugin = plugin;
-        plugin->mimic_init();
+        plugin->mimic_init(ctx);
         return plug_hdl;
     }
-    int mimic_plugin_unload(mimic_plugin_handler_t *plug_hdl)
+    int mimic_plugin_unload(mimic_context *ctx, mimic_plugin_handler_t *plug_hdl)
     {
-        plug_hdl->plugin->mimic_exit();
+        plug_hdl->plugin->mimic_exit(ctx);
         FreeLibrary(plug_hdl->handle);
         cst_free(plug_hdl);
         return 0;
@@ -269,45 +269,46 @@ const char* mimic_get_plugin_dir()
     }
 #endif
 
-int mimic_plugins_init()
+int mimic_plugins_init(mimic_context *ctx)
 {
   size_t i;
   char **plugin_files = NULL;
-  if (mimic_plugins != NULL)
+  if (ctx->plugins != NULL)
     return 0;
   int num_plugins = list_all_plugins(&plugin_files);
-  mimic_plugins = cst_alloc(mimic_plugin_handler_t*, num_plugins+1);
+  ctx->plugins = cst_alloc(mimic_plugin_handler_t*, num_plugins+1);
   for (i = 0; i<num_plugins; i++)
   {
-    mimic_plugins[i] = mimic_plugin_load(plugin_files[i]);
+    ctx->plugins[i] = mimic_plugin_load(ctx, plugin_files[i]);
     free(plugin_files[i]);
   }
-  mimic_plugins[num_plugins] = NULL;
+  ctx->plugins[num_plugins] = NULL;
   free(plugin_files);
   return 0;
 }
 
-void mimic_plugins_exit()
+void mimic_plugins_exit(mimic_context *ctx)
 {
   size_t i=0;
-  if (mimic_plugins != NULL)
+  if (ctx->plugins != NULL)
   {
-    for (i=0;mimic_plugins[i] != NULL;i++)
+    for (i=0;ctx->plugins[i] != NULL;i++)
     {
-      mimic_plugin_unload(mimic_plugins[i]);
+      mimic_plugin_unload(ctx, ctx->plugins[i]);
     }
-    cst_free(mimic_plugins);
+    cst_free(ctx->plugins);
+    ctx->plugins = NULL;
   }
 }
 
 #else /* No plugins */
 
-int mimic_plugins_init()
+int mimic_plugins_init(mimic_context *ctx)
 {
   return 0;
 }
 
-void mimic_plugins_exit()
+void mimic_plugins_exit(mimic_context *ctx)
 {
   return;
 }

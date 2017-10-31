@@ -48,31 +48,58 @@
 #include "cst_audio.h"
 #include "cst_plugins.h"
 
-/* TODO: Define a public mimic API */
-
-/* TODO: Create a mimic_state struct that contains all global variables
- * and is returned at mimic_init and passed as needed
- * through the mimic API */
- 
-/* This is a global, which isn't ideal, this may change */
-/* It is set when mimic_set_voice_list() is called which happens in */
-/* mimic_main() */
-cst_val *mimic_voice_list = 0;
-cst_lang mimic_lang_list[20];
-static int mimic_lang_list_length = 0;
-
-int mimic_core_init()
+static mimic_context *mimic_context_init()
 {
+    mimic_context *ctx = cst_alloc(mimic_context, 1);
+    if (ctx == NULL)
+    {
+        return NULL;
+    }
+    ctx->version = 0;
+    ctx->voices = NULL;
+    ctx->languages = NULL;
+    ctx->plugins = NULL;
+    ctx->num_voices = 0;
+    ctx->voices_size = 32;
+    ctx->num_languages = 0;
+    ctx->languages_size = 32;
+    return ctx;
+}
+
+static void mimic_context_delete(mimic_context *ctx)
+{
+    cst_free(ctx->voices);
+    cst_free(ctx->languages);
+    cst_free(ctx);
+}
+
+mimic_context *mimic_core_init_no_plugins()
+{
+    mimic_context *ctx = mimic_context_init();
     cst_regex_init();
     mimic_audio_init();
-    mimic_plugins_init();
+    return ctx;
+}
+
+mimic_context *mimic_core_init()
+{
+    mimic_context *ctx = mimic_core_init_no_plugins();
+    mimic_plugins_init(ctx);
+    return ctx;
+}
+
+int mimic_core_exit_no_plugins(mimic_context *ctx)
+{
+    mimic_audio_exit();
+    mimic_context_delete(ctx);
     return 0;
 }
 
-int mimic_core_exit()
+
+int mimic_core_exit(mimic_context *ctx)
 {
-    mimic_plugins_exit();
-    mimic_audio_exit();
+    mimic_plugins_exit(ctx);
+    mimic_core_exit_no_plugins(ctx);
     return 0;
 }
 
@@ -81,78 +108,130 @@ int mimic_voice_dump(cst_voice *voice, const char *filename)
     return cst_cg_dump_voice(voice, filename);
 }
 
-cst_voice *mimic_voice_load(const char *filename)
+cst_voice *mimic_voice_load(mimic_context *ctx, const char *filename)
 {
     /* Currently only supported for CG voices */
     /* filename make be a local pathname or a url (http:/file:) */
     cst_voice *v = NULL;
 
-    v = cst_cg_load_voice(filename, mimic_lang_list);
+    v = cst_cg_load_voice(ctx, filename);
 
     return v;
 }
 
-int mimic_add_voice(cst_voice *voice)
+int mimic_voice_add(mimic_context *ctx, cst_voice *voice)
 {
-    const cst_val *x;
-    if (voice)
+    if (ctx == NULL || voice == NULL)
     {
-        /* add to second place -- first is default voice */
-        /* This is thread unsafe */
-        if (mimic_voice_list)
-        {                       /* Other voices -- first is default, add this second */
-            x = cons_val(voice_val(voice), val_cdr(mimic_voice_list));
-            set_cdr(mimic_voice_list, x);
-        }
-        else
-        {                       /* Only voice so goes on front */
-            mimic_voice_list = cons_val(voice_val(voice), mimic_voice_list);
-        }
-
+        return FALSE;
+    }
+    if (mimic_voice_select(ctx, voice->name) != NULL)
+    {
+        cst_errmsg("Voice %s already loaded", voice->name);
         return TRUE;
     }
-    else
-        return FALSE;
 
-}
-
-int mimic_add_lang(const char *langname,
-                   void (*lang_init) (cst_voice *vox),
-                   cst_lexicon *(*lex_init) ())
-{
-    size_t i;
-    for (i = 0; i < mimic_lang_list_length; i++)
+    if (ctx->num_voices == ctx->voices_size)
     {
-        if (cst_streq(langname, mimic_lang_list[i].lang))
+        /* Grow ctx->voices */
+        if (ctx->voices_size == 0)
         {
-            return TRUE;
+            ctx->voices = cst_alloc(cst_voice*, 32);
+            if (ctx->voices == NULL)
+            {
+                return FALSE;
+            }
+            ctx->voices_size = 32;
+        } else
+        {
+            cst_voice **v_old = ctx->voices;
+            ctx->voices = cst_alloc(cst_voice*, 2*ctx->voices_size);
+            if (ctx->voices == NULL)
+            {
+                ctx->voices = v_old;
+                return FALSE;
+            }
+            memcpy(ctx->voices, v_old, sizeof(cst_voice*) * ctx->voices_size);
+            cst_free(v_old);
+            ctx->voices_size = 2*ctx->voices_size;
         }
     }
-    if (mimic_lang_list_length < 19)
-    {
-        mimic_lang_list[mimic_lang_list_length].lang = langname;
-        mimic_lang_list[mimic_lang_list_length].lang_init = lang_init;
-        mimic_lang_list[mimic_lang_list_length].lex_init = lex_init;
-        mimic_lang_list_length++;
-        mimic_lang_list[mimic_lang_list_length].lang = NULL;
-    }
-     else 
-     {
-         cst_errmsg("Error: Language limit reached, could not add: '%s'\n", langname);
-     }
-
+    ctx->voices[ctx->num_voices] = voice;
+    ctx->num_voices++;
     return TRUE;
 }
 
-const cst_lang* mimic_lang_select(const char *lang)
+cst_lang *mimic_lang_new(
+    const char *langname,
+    void (*lang_init) (cst_voice *vox),
+    cst_lexicon *(*lex_init) ())
+{
+    cst_lang *lang = cst_alloc(cst_lang, 1);
+    if (lang == NULL)
+    {
+        return NULL;
+    }
+    lang->lang = langname;
+    lang->lang_init = lang_init;
+    lang->lex_init = lex_init;
+    return lang;
+}
+
+int mimic_lang_add(mimic_context *ctx,
+                   const char *langname,
+                   void (*lang_init) (cst_voice *vox),
+                   cst_lexicon *(*lex_init) ())
+{
+    if (ctx == NULL || langname == NULL)
+    {
+        return FALSE;
+    }
+    if (mimic_lang_select(ctx, langname) != NULL)
+    {
+        cst_errmsg("Language %s already loaded", langname);
+        return TRUE;
+    }
+
+    if (ctx->num_languages == ctx->languages_size)
+    {
+        /* Grow ctx->languages */
+        if (ctx->languages_size == 0)
+        {
+            ctx->languages = cst_alloc(cst_lang*, 32);
+            if (ctx->languages == NULL)
+            {
+                return FALSE;
+            }
+            ctx->languages_size = 32;
+        } else
+        {
+            cst_lang **l_old = ctx->languages;
+            ctx->languages = cst_alloc(cst_lang*, 2*ctx->languages_size);
+            if (ctx->languages == NULL)
+            {
+                ctx->languages = l_old;
+                return FALSE;
+            }
+            memcpy(ctx->languages, l_old, sizeof(cst_lang*) * ctx->languages_size);
+            cst_free(l_old);
+            ctx->languages_size = 2*ctx->languages_size;
+        }
+    }
+    cst_lang *lang = mimic_lang_new(langname, lang_init, lex_init);    
+    ctx->languages[ctx->num_languages] = lang;
+    ctx->num_languages++;
+    return TRUE;
+}
+
+const cst_lang* mimic_lang_select(mimic_context *ctx, const char *lang)
 {
     size_t i;
     /* Search mimic_lang_list for lang_init() and lex_init(); */
-    for (i = 0; mimic_lang_list[i].lang; ++i)
+    for (i = 0; ctx->num_languages; ++i)
     {
-        if (cst_streq(lang, mimic_lang_list[i].lang))
+        if (cst_streq(lang, ctx->languages[i]->lang))
         {
-            return &mimic_lang_list[i];
+            return ctx->languages[i];
         }
     }
     return NULL;
@@ -160,28 +239,42 @@ const cst_lang* mimic_lang_select(const char *lang)
 
 
 
-cst_voice *mimic_voice_select(const char *name)
+cst_voice *mimic_voice_select(mimic_context *ctx, const char *name)
 {
-    const cst_val *v;
     cst_voice *voice;
-    if ((name == NULL) && (mimic_voice_list != NULL))
+    if (ctx == NULL)
     {
-        return val_voice(val_car(mimic_voice_list));
+        return NULL;
     }
-    if (mimic_voice_list != NULL)
+    if (ctx->voice_selected != NULL && name == NULL)
     {
-        for (v = mimic_voice_list; v; v = val_cdr(v))
+        if (ctx->voice_selected != NULL)
         {
-            voice = val_voice(val_car(v));
-            if (cst_streq(name, voice->name))       /* short name */
-                return voice;
-            if (cst_streq(name, get_param_string(voice->features, "name", "")))
-                /* longer name */
-                return voice;
-            if (cst_streq
-                    (name, get_param_string(voice->features, "pathname", "")))
-                /* even longer name (url) */
-                return voice;
+            return ctx->voice_selected;
+        }
+        if (ctx->num_voices > 0)
+        {
+            return ctx->voices[0];
+        }
+        return NULL;
+    }
+    size_t i;
+    for (i=0;i < ctx->num_voices; i++)
+    {
+        if (cst_streq(name, ctx->voices[i]->name))
+        {
+            /* short name */
+            return ctx->voices[i];
+        }
+        if (cst_streq(name, get_param_string(ctx->voices[i]->features, "name", "")))
+        {
+            /* longer name */
+            return ctx->voices[i];
+        }
+        if (cst_streq(name, get_param_string(ctx->voices[i]->features, "pathname", "")))
+        {
+            /* even longer name (url) */
+            return ctx->voices[i];
         }
     }
 
@@ -189,11 +282,11 @@ cst_voice *mimic_voice_select(const char *name)
             cst_strchr(name, '/') ||
             cst_strchr(name, '\\')))
     {
-        voice = mimic_voice_load(name);
+        voice = mimic_voice_load(ctx, name);
         if (!voice)
             cst_errmsg("Error load voice: failed to load voice from %s\n",
                        name);
-        mimic_add_voice(voice);
+        mimic_voice_add(ctx, voice);
         return voice;
     }
     return NULL;

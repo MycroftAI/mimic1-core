@@ -135,7 +135,8 @@ static cst_features *ssml_get_attributes(cst_tokenstream *ts)
     return a;
 }
 
-static cst_utterance *ssml_apply_tag(const char *tag,
+static cst_utterance *ssml_apply_tag(mimic_context *ctx,
+                                     const char *tag,
                                      cst_features *attributes,
                                      cst_utterance *u,
                                      cst_features *word_feats,
@@ -262,7 +263,7 @@ static cst_utterance *ssml_apply_tag(const char *tag,
         if (cst_streq("start", feat_string(attributes, "_type")))
         {
             vname = get_param_string(attributes, "_val0", "");
-            nvoice = mimic_voice_select(vname);
+            nvoice = mimic_voice_select(ctx, vname);
             feat_set(feats, "current_voice", userdata_val(nvoice));
             return NULL;        /* cause an utterance break */
         }
@@ -289,7 +290,8 @@ static cst_utterance *ssml_apply_tag(const char *tag,
     return u;
 }
 
-static float mimic_ssml_to_speech_ts(cst_tokenstream *ts, cst_voice *voice,
+static float mimic_ssml_to_speech_ts(mimic_context *ctx,
+                                     cst_tokenstream *ts, cst_voice *voice,
                                      const char *outtype, float *durs)
 {
     /* This is a very ugly function, that might be better written with gotos */
@@ -383,7 +385,7 @@ static float mimic_ssml_to_speech_ts(cst_tokenstream *ts, cst_voice *voice,
                 attributes = ssml_get_attributes(ts);
             token = ts_get(ts); /* skip ">" */
             if (ssml_apply_tag
-                (tag, attributes, utt, ssml_word_feats, ssml_feats))
+                (ctx, tag, attributes, utt, ssml_word_feats, ssml_feats))
                 ssml_eou = 0;
             else
                 ssml_eou = 1;
@@ -481,8 +483,10 @@ static float mimic_ssml_to_speech_ts(cst_tokenstream *ts, cst_voice *voice,
     return err;
 }
 
-int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
-                                 const char *outtype, float *dur)
+int mimic_ssml_file_to_speech(
+    mimic_context *ctx,
+    const char *filename, cst_voice *voice,
+    const char *outtype, float *dur)
 {
     cst_tokenstream *ts;
     int fp;
@@ -528,7 +532,7 @@ int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
         delete_wave(w);
     }
 
-    err = mimic_ssml_to_speech_ts(ts, voice, outtype, dur);
+    err = mimic_ssml_to_speech_ts(ctx, ts, voice, outtype, dur);
 
     ts_close(ts);
 
@@ -536,8 +540,9 @@ int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
 
 }
 
-int mimic_ssml_text_to_speech(const char *text, cst_voice *voice,
-                                const char *outtype, float *dur)
+int mimic_ssml_text_to_speech(mimic_context *ctx,
+    const char *text, cst_voice *voice,
+    const char *outtype, float *dur)
 {
     cst_tokenstream *ts;
     int fp;
@@ -582,7 +587,7 @@ int mimic_ssml_text_to_speech(const char *text, cst_voice *voice,
         delete_wave(w);
     }
 
-    err = mimic_ssml_to_speech_ts(ts, voice, outtype, dur);
+    err = mimic_ssml_to_speech_ts(ctx, ts, voice, outtype, dur);
 
     ts_close(ts);
 

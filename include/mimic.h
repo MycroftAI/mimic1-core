@@ -68,17 +68,28 @@ extern "C" {
 #include "cst_tokenstream.h"
 #include "cst_plugins.h"
 
-MIMIC_CORE_PUBLIC extern cst_val *mimic_voice_list;
-extern cst_lang mimic_lang_list[20];
+typedef struct mimic_context_s {
+    uint16_t version;
+    cst_voice **voices;
+    cst_lang **languages;
+    mimic_plugin_handler_t **plugins;
+    uint32_t num_voices;
+    uint32_t voices_size;
+    uint32_t num_languages;
+    uint32_t languages_size;
+    cst_voice *voice_selected;
+} mimic_context;
 
 /* Public functions */
-MIMIC_CORE_PUBLIC int mimic_core_init();
-MIMIC_CORE_PUBLIC int mimic_core_exit();
+MIMIC_CORE_PUBLIC mimic_context *mimic_core_init();
+MIMIC_CORE_PUBLIC int mimic_core_exit(mimic_context *ctx);
+MIMIC_CORE_PUBLIC mimic_context *mimic_core_init_no_plugins();
+MIMIC_CORE_PUBLIC int mimic_core_exit_no_plugins(mimic_context *ctx);
 
 /* General top level functions */
-MIMIC_CORE_PUBLIC const cst_lang *mimic_lang_select(const char *lang);
-MIMIC_CORE_PUBLIC cst_voice *mimic_voice_select(const char *name);
-MIMIC_CORE_PUBLIC cst_voice *mimic_voice_load(const char *voice_filename);
+MIMIC_CORE_PUBLIC const cst_lang *mimic_lang_select(mimic_context *ctx, const char *lang);
+MIMIC_CORE_PUBLIC cst_voice *mimic_voice_select(mimic_context *ctx, const char *name);
+MIMIC_CORE_PUBLIC cst_voice *mimic_voice_load(mimic_context *ctx, const char *filename);
 MIMIC_CORE_PUBLIC int mimic_voice_dump(cst_voice *voice, const char *voice_filename);
 MIMIC_CORE_PUBLIC int mimic_file_to_speech(const char *filename, cst_voice *voice,
                              const char *outtype, float *dur);
@@ -86,10 +97,12 @@ MIMIC_CORE_PUBLIC int mimic_text_to_speech(const char *text, cst_voice *voice,
                              const char *outtype, float *dur);
 MIMIC_CORE_PUBLIC int mimic_phones_to_speech(const char *text, cst_voice *voice,
                                const char *outtype, float *dur);
-MIMIC_CORE_PUBLIC int mimic_ssml_file_to_speech(const char *filename, cst_voice *voice,
-                                    const char *outtype, float *dur);
-MIMIC_CORE_PUBLIC int mimic_ssml_text_to_speech(const char *text, cst_voice *voice,
-                                    const char *outtype, float *dur);
+MIMIC_CORE_PUBLIC int mimic_ssml_file_to_speech(
+    mimic_context *ctx,const char *filename, cst_voice *voice,
+    const char *outtype, float *dur);
+MIMIC_CORE_PUBLIC int mimic_ssml_text_to_speech(
+    mimic_context *ctx, const char *text, cst_voice *voice,
+    const char *outtype, float *dur);
 MIMIC_CORE_PUBLIC int mimic_voice_add_lex_addenda(cst_voice *v, const cst_string *lexfile);
 
 /* Lower lever user functions */
@@ -132,8 +145,8 @@ MIMIC_CORE_PUBLIC int mimic_voice_add_lex_addenda(cst_voice *v, const cst_string
 
 /* These functions are *not* thread-safe, they are designed to be called */
 /* before the initial synthesis occurs */
-    MIMIC_CORE_PUBLIC int mimic_add_voice(cst_voice *voice);
-    MIMIC_CORE_PUBLIC int mimic_add_lang(const char *langname,
+MIMIC_CORE_PUBLIC int mimic_voice_add(mimic_context *ctx, cst_voice *voice);
+    MIMIC_CORE_PUBLIC int mimic_lang_add(mimic_context *ctx, const char *langname,
                        void (*lang_init) (cst_voice *vox),
                        cst_lexicon *(*lex_init) ());
 /* These are init functions for generic grapheme based voices */

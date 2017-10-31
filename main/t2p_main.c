@@ -50,10 +50,10 @@ static cst_utterance *no_wave_synth(cst_utterance *u)
     return u;
 }
 
-static cst_voice *voice_no_wave(const char *lang_code, const char *dialect,
+static cst_voice *voice_no_wave(mimic_context *ctx, const char *lang_code, const char *dialect,
                                 int use_addenda, int use_lexicon)
 {
-    const cst_lang *lang = mimic_lang_select(lang_code);
+    const cst_lang *lang = mimic_lang_select(ctx, lang_code);
     cst_voice *v = new_voice();
 
     v->name = "no_wave_voice";
@@ -137,8 +137,8 @@ int main(int argc, char **argv)
     {
         use_lexicon = 0;
     }
-    mimic_core_init();
-    v = voice_no_wave(lang, dialect, use_addenda, use_lexicon);
+    mimic_context *ctx = mimic_core_init();
+    v = voice_no_wave(ctx, lang, dialect, use_addenda, use_lexicon);
     if (v == NULL)
     {
        cst_errmsg("Could not load voice with language '%s' and dialect '%s'\n", lang, dialect == NULL ? "" : dialect);
@@ -164,6 +164,6 @@ int main(int argc, char **argv)
     delete_features(args);
     delete_val(files);
 
-    mimic_core_exit();
+    mimic_core_exit(ctx);
     return 0;
 }

@@ -53,6 +53,7 @@
 #include "cst_wave.h"
 #include "cst_audio.h"
 #include "cst_synth.h"          /* for dur_stat */
+#include "mimic.h"
 
 typedef struct cst_cg_db_struct {
     /* Please do not change this structure, but if you do only add things
@@ -135,8 +136,7 @@ cst_wave *mlsa_resynthesis(const cst_track *t,
                            cst_audio_streaming_info *asc);
 cst_track *mlpg(const cst_track *param_track, cst_cg_db *cg_db);
 
-cst_voice *cst_cg_load_voice(const char *voxdir,
-                             const cst_lang lang_table[]);
+cst_voice *cst_cg_load_voice(mimic_context *ctx, const char *voxdir);
 int cst_cg_dump_voice(const cst_voice *v, const cst_string *filename);
 
 #endif
