@@ -66,7 +66,7 @@ BOOL WINAPI windows_signal_handler(DWORD signum)
         return FALSE;
 }
 #else
-void sigint_handler(int signum)
+static void sigint_handler(int signum)
 {
     mimic_audio_shutdown(signum);
 }
