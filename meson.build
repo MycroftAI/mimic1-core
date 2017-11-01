@@ -458,6 +458,7 @@ unit_tests =  [
   ['wave', ['-DCOMPILE_EXE_MIMIC_CORE',
             '-DA_WAV1="' + join_paths(meson.current_source_dir(), 'unittests', 'hello_world.wav') + '"',
             '-DA_WAV2="' + join_paths(meson.current_source_dir(), 'unittests', 'hi_again.wav') + '"']],
+  ['lts', ['-DCOMPILE_EXE_MIMIC_CORE']],
   ['include_public_headers', []]
   ]
 

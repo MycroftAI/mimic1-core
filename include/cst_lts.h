@@ -37,9 +37,10 @@
 /*  Letter to sound rules                                                */
 /*                                                                       */
 /*************************************************************************/
-#ifndef _CST_LTS_H__
-#define _CST_LTS_H__
+#ifndef CST_LTS_H
+#define CST_LTS_H
 
+#include "cst_lib_visibility.h"
 #include "cst_string.h"
 #include "cst_val.h"
 #include <stdint.h>
@@ -81,6 +82,6 @@ typedef struct cst_lts_rules_struct {
 
 cst_lts_rules *new_lts_rules();
 
-cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r);
+MIMIC_CORE_PUBLIC cst_val *lts_apply(const char *word, const char *feats, const cst_lts_rules *r);
 
 #endif
