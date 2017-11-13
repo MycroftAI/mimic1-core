@@ -377,6 +377,7 @@ ttsmimic_public_headers = [
   'include/cst_hrg.h',
   'include/cst_item.h',
   'include/cst_lexicon.h',
+  'include/cst_lib_visibility.h',
   'include/cst_lts.h',
   'include/cst_lts_rewrites.h',
   'include/cst_phoneset.h',
