@@ -66,7 +66,7 @@ BOOL WINAPI windows_signal_handler(DWORD signum)
         return FALSE;
 }
 #else
-void sigint_handler(int signum)
+static void sigint_handler(int signum)
 {
     mimic_audio_shutdown(signum);
 }
@@ -118,19 +118,16 @@ static void mimic_usage()
     exit(0);
 }
 
-static void mimic_voice_list_print(void)
+static void mimic_voice_list_print(mimic_context *ctx)
 {
-    cst_voice *voice;
-    const cst_val *v;
+    size_t i;
 
     printf("Voices available: ");
-    for (v = mimic_voice_list; v; v = val_cdr(v))
+    for (i = 0; i < ctx->num_voices;i++)
     {
-        voice = val_voice(val_car(v));
-        printf("%s ", voice->name);
+        printf("%s ", ctx->voices[i]->name);
     }
     printf("\n");
-
     return;
 }
 
@@ -234,14 +231,14 @@ int main(int argc, char **argv)
     ssml_mode = FALSE;
     extra_feats = new_features();
 
-    mimic_core_init();
+    mimic_context *ctx = mimic_core_init();
 
     for (i = 1; i < argc; i++)
     {
         if (cst_streq(argv[i], "--version"))
         {
             mimic_version();
-            mimic_core_exit();
+            mimic_core_exit(ctx);
             return 1;
         }
         else if (cst_streq(argv[i], "-h") || cst_streq(argv[i], "--help")
@@ -251,8 +248,9 @@ int main(int argc, char **argv)
             mimic_verbose = TRUE;
         else if (cst_streq(argv[i], "-lv"))
         {
-            mimic_voice_list_print();
+            mimic_voice_list_print(ctx);
             delete_features(extra_feats);
+            mimic_core_exit(ctx);
             exit(0);
         }
         else if (cst_streq(argv[i], "-l"))
@@ -269,7 +267,7 @@ int main(int argc, char **argv)
         }
         else if ((cst_streq(argv[i], "-voice")) && (i + 1 < argc))
         {
-            desired_voice = mimic_voice_select(argv[i + 1]);
+            desired_voice = mimic_voice_select(ctx, argv[i + 1]);
             i++;
         }
         else if ((cst_streq(argv[i], "-add_lex")) && (i + 1 < argc))
@@ -361,14 +359,14 @@ int main(int argc, char **argv)
 
     if (filename == NULL)
         filename = "-";         /* stdin */
-    if (desired_voice == 0)
-        desired_voice = mimic_voice_select(NULL);
+    if (desired_voice == NULL)
+        desired_voice = mimic_voice_select(ctx, NULL);
 
-    if (desired_voice == 0)
+    if (desired_voice == NULL)
     {
         fprintf(stderr, "No voice given and no voice precompiled\n");
         delete_features(extra_feats);
-        mimic_core_exit();
+        mimic_core_exit(ctx);
         return 1;
     }
     v = desired_voice;
@@ -409,14 +407,14 @@ int main(int argc, char **argv)
     else if ((strchr(filename, ' ') && !explicit_filename) || explicit_text)
     {
         if (ssml_mode)
-            err = mimic_ssml_text_to_speech(filename, v, outtype, &durs);
+            err = mimic_ssml_text_to_speech(ctx, filename, v, outtype, &durs);
         else
             err = mimic_text_to_speech(filename, v, outtype, &durs);
     }
     else
     {
         if (ssml_mode)
-            err = mimic_ssml_file_to_speech(filename, v, outtype, &durs);
+            err = mimic_ssml_file_to_speech(ctx, filename, v, outtype, &durs);
         else
             err = mimic_file_to_speech(filename, v, outtype, &durs);
     }
@@ -434,10 +432,6 @@ int main(int argc, char **argv)
         goto loop;
 
     delete_features(extra_feats);
-    delete_val(mimic_voice_list);
-    mimic_voice_list = 0;
-    /*    cst_alloc_debug_summary(); */
-
-    mimic_core_exit();
+    mimic_core_exit(ctx);
     return 0;
 }

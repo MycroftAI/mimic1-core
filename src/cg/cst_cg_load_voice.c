@@ -43,12 +43,11 @@
 #include "cst_cg_map.h"
 #include "cst_alloc.h"
 
-cst_voice *cst_cg_load_voice(const char *filename,
-                             const cst_lang * lang_table)
+cst_voice *cst_cg_load_voice(mimic_context *ctx, const char *filename)
 {
     cst_voice *vox;
     cst_lexicon *lex = NULL;
-    int i, end_of_features;
+    int end_of_features;
     const char *language;
     const char *xname;
     cst_cg_db *cg_db;
@@ -109,14 +108,12 @@ cst_voice *cst_cg_load_voice(const char *filename,
     language = mimic_get_param_string(vox->features, "language", "");
 
     /* Search Lang table for lang_init() and lex_init(); */
-    for (i = 0; lang_table[i].lang; i++)
+    const cst_lang *lang = mimic_lang_select(ctx, language);
+    
+    if (lang != NULL)
     {
-        if (cst_streq(language, lang_table[i].lang))
-        {
-            (lang_table[i].lang_init) (vox);
-            lex = (lang_table[i].lex_init) ();
-            break;
-        }
+        (lang->lang_init) (vox);
+        lex = (lang->lex_init) ();
     }
     if (lex == NULL)
     {                           /* Language is not supported */

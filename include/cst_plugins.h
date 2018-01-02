@@ -37,29 +37,32 @@
 #ifndef include_cst_plugins_h
 #define include_cst_plugins_h
 #include "mimic_core_config.h"
+
+struct mimic_context_s;
+typedef struct mimic_context_s mimic_context;
+
 #ifdef MIMIC_ENABLE_PLUGINS
 typedef struct mimic_plugin_s
 {
     char *name;
     int version;
-    void (*mimic_init)(void);
-    void (*mimic_exit)(void);
+    void (*mimic_init)(mimic_context *ctx);
+    void (*mimic_exit)(mimic_context *ctx);
 } mimic_plugin_t;
 
 typedef struct mimic_plugin_handler_s
 {
   void *handle;
-  mimic_plugin_t* plugin;
+  mimic_plugin_t *plugin;
 } mimic_plugin_handler_t;
- 
-mimic_plugin_handler_t* mimic_plugin_load(const char *filename);
-int mimic_plugin_unload(mimic_plugin_handler_t *plugin);
-extern mimic_plugin_handler_t** mimic_plugins;
+
+mimic_plugin_handler_t* mimic_plugin_load(mimic_context *ctx, const char *filename);
+int mimic_plugin_unload(mimic_context *ctx, mimic_plugin_handler_t *plugin);
 
 #endif
 
 
-int mimic_plugins_init();
-void mimic_plugins_exit();
+int mimic_plugins_init(mimic_context *ctx);
+void mimic_plugins_exit(mimic_context *ctx);
 
 #endif /*header */

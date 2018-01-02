@@ -20,7 +20,6 @@ void test_copy(void)
 {
    cst_wave *w1 = new_wave();
    cst_wave *w2;
-   mimic_core_init();
    TEST_CHECK(cst_wave_load_riff(w1, A_WAV1) == 0);
    w2 = copy_wave(w1);
    TEST_CHECK(w1 != w2);
@@ -33,7 +32,6 @@ void test_copy(void)
    TEST_CHECK(w1->samples[20] == w2->samples[20]);
    delete_wave(w1);
    delete_wave(w2);
-   mimic_core_exit();
 }
 
 void test_concat(void)
@@ -41,7 +39,6 @@ void test_concat(void)
    int original_len;
    cst_wave *w1 = new_wave();
    cst_wave *w2 = new_wave();
-   mimic_core_init();
    TEST_CHECK(cst_wave_load_riff(w1, A_WAV1) == 0);
    TEST_CHECK(cst_wave_load_riff(w2, A_WAV2) == 0);
    original_len = w1->num_samples;

@@ -61,7 +61,7 @@ int main(int argc, char **argv)
                     "-info          Output general info on voice\n"
                     "set/get features in a mimicvox voice.", args);
 
-    mimic_core_init();
+    mimic_context *ctx = mimic_core_init();
 
     if (!feat_present(args, "-voice"))
     {
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         exit(-1);
     }
     voice_name = feat_string(args, "-voice");
-    v = mimic_voice_load(voice_name);
+    v = mimic_voice_load(ctx, voice_name);
     if (v == NULL)
     {
         fprintf(stderr, "can't load voice %s\n", voice_name);
@@ -100,7 +100,7 @@ int main(int argc, char **argv)
         printf("%s \"%s\"\n", feat, feat_string(v->features, feat));
     }
 
-    mimic_core_exit();
+    mimic_core_exit(ctx);
 
     return 0;
 
