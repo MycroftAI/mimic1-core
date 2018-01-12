@@ -43,7 +43,7 @@
 #include "cst_audio.h"
 #include "cst_string.h"
 #include "cst_wave.h"
-
+#include "native_audio.h"
 
 CST_VAL_REGISTER_TYPE(audio_streaming_info, cst_audio_streaming_info);
 cst_audio_streaming_info *new_audio_streaming_info(void)
@@ -85,6 +85,11 @@ int audio_stream_chunk(const cst_wave *w, int start, int size,
     {
         mimic_audio_close(ad);
         ad = NULL;
+    }
+
+    if (shutdown_request == 1)
+    {
+        return CST_AUDIO_STREAM_STOP;
     }
 
     /* if you want to stop return CST_AUDIO_STREAM_STOP */
